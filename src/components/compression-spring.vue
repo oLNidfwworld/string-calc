@@ -2,24 +2,31 @@
   <div class="spring-main__wrapper">
     <div>
        <div class="spring-inputs">
+         <vSelect class="style-chooser" :options="Material" v-model="MaterialSelect" :clearable="false" label="title"/>
          <smart-input inputLabel="Материал:" custom-placeholder="Enter the number"
-         btn-type="text" :custom-step="InputStep" v-model:inputValue="MaterialPlaceholder" />
-         <smart-input inputLabel="Модуль сдвига:" custom-placeholder="Enter the number"
-         btn-type="text" :custom-step="InputStep" v-model:inputValue="ModuleSdviga" />
-         <smart-input inputLabel="ф проволоки" custom-placeholder="Enter the number"
-         btn-type="text" :custom-step="InputStep" v-model:inputValue="Fprovoloki" />
-         <smart-input inputLabel="наружний ф" custom-placeholder="Enter the number"
-         btn-type="text" :custom-step="InputStep" v-model:inputValue="NaruzhniyF" />
-         <smart-input inputLabel="высота в свободном состоянии" custom-placeholder="Enter the number"
-         btn-type="text" :custom-step="InputStep" v-model:inputValue="VisotaVSvobodnomSostoyanii" />
-         <smart-input inputLabel="количество рабочих витков" custom-placeholder="Enter the number"
-         btn-type="text" :custom-step="InputStep" v-model:inputValue="RabocheeChisloVetkov" />
-         <smart-input inputLabel="контрольная(предварительная) высота" custom-placeholder="Enter the number"
-         btn-type="text" :custom-step="InputStep" v-model:inputValue="KontrolnayaVisota" />
-         <smart-input inputLabel="контрольная рабочая высота" custom-placeholder="Enter the number"
-         btn-type="text" :custom-step="InputStep" v-model:inputValue="ControlRabochayaVisota" />
-         <smart-input inputLabel="Количество пружин в партии:" custom-placeholder="Enter the number"
-         btn-type="text" :custom-step="InputStep" v-model:inputValue="KolichestvoPartii" />
+         btn-type="text" :custom-step="InputStep" v-model:inputValue="Material" />
+         <smart-input inputLabel="Вариант оформления опорных витков:" custom-placeholder="Enter the number"
+         btn-type="text" :custom-step="InputStep" v-model:inputValue="VariantOfDesignOfSupportCoils" />
+         <smart-input inputLabel="Диаметр проволоки мм:" custom-placeholder="Enter the number"
+         btn-type="text" :custom-step="InputStep" v-model:inputValue="WireDiameter" />
+         <smart-input inputLabel="Наружний диаметр мм:" custom-placeholder="Enter the number"
+         btn-type="text" :custom-step="InputStep" v-model:inputValue="OuterDiameter" />
+         <smart-input inputLabel="Длина в свободном состоянии Lo:" custom-placeholder="Enter the number"
+         btn-type="text" :custom-step="InputStep" v-model:inputValue="FreeLength" />
+         <smart-input inputLabel="Рабочее число витков n:" custom-placeholder="Enter the number"
+         btn-type="text" :custom-step="InputStep" v-model:inputValue="WorkNumberOfCoils" />
+         <smart-input inputLabel="Полное число витков n1:" custom-placeholder="Enter the number"
+         btn-type="text" :custom-step="InputStep" v-model:inputValue="TotalNumberOfCoils" />
+         <smart-input inputLabel="Длина при предварительной деформации L1:" custom-placeholder="Enter the number"
+         btn-type="text" :custom-step="InputStep" v-model:inputValue="LengthAtPreDeformation" />
+         <smart-input inputLabel="Длина при рабочей деформации L2:" custom-placeholder="Enter the number"
+         btn-type="text" :custom-step="InputStep" v-model:inputValue="LengthAtWorkingDeformation" />
+         <smart-input inputLabel="Направление навивки:" custom-placeholder="Enter the number"
+         btn-type="text" :custom-step="InputStep" v-model:inputValue="WindingDirection" />
+         <smart-input inputLabel="Покрытие:" custom-placeholder="Enter the number"
+         btn-type="text" :custom-step="InputStep" v-model:inputValue="Covering" />
+         <smart-input inputLabel="Количество шт.:" custom-placeholder="Enter the number"
+         btn-type="text" :custom-step="InputStep" v-model:inputValue="Quantity" />
       <!--   <smart-input inputLabel="Рабочее число витков n:" custom-placeholder="Enter the number"-->
       <!--   btn-type="text" :custom-step="InputStep" v-model:inputValue="KontrolnayaRabochayaVisota" />-->
        </div>
@@ -31,15 +38,15 @@
           <span class="scheme-title">Расчет пружин сжатия</span>
         </div>
         <div class="scheme-spring px-3 xl:px-20 mb-5">
-          <scheme-spring v-if="SpringType === 'szhatie'" :SchemeData="SchemeData"/>
+          <scheme-spring :SchemeData="SchemeData"/>
         </div>
         <div class="">
-          <div v-for="item in SchemeData" class="scheme-total__item" :key="item.id">
+          <div v-for="item in ForTotal" class="scheme-total__item" :key="item.id">
             <span>
               {{ item.name }}
             </span>
             <span>
-              {{ item.value }}
+              {{ item.value + ' ' + item.measure }}
             </span>
           </div>
         </div>
@@ -51,133 +58,214 @@
 <script>
 import SmartInput from '@/components/smart-input'
 import SchemeSpring from '@/components/scheme-spring'
+import vSelect from 'vue-select'
+import 'vue-select/dist/vue-select.css'
+
 export default {
   name: 'compression-spring',
-  components: { SchemeSpring, SmartInput },
+  components: { SchemeSpring, SmartInput, vSelect },
   data () {
     return {
-      ModuleSdviga: '78500',
-      Fprovoloki: '6',
-      NaruzhniyF: '53',
-      VisotaVSvobodnomSostoyanii: '90',
-      RabocheeChisloVetkov: '5',
-      KontrolnayaVisota: '80',
-      ControlRabochayaVisota: '70',
-      KolichestvoPartii: '100',
-      DlinaRazvernutoyPruzhini: '7',
-      MaterialPlaceholder: 'mat',
-      DlinaL2: '4',
+      MaterialSelect: 'ГОСТ 9389-75 Б-2',
+      Material: [
+        'ГОСТ 9389-75 Б-2',
+        'ГОСТ 9389-75 А-1',
+        '60С2А', '51ХФА',
+        'EN 10270-1',
+        'EN 10270-2',
+        'нерж. EN 10270-3-1.4310 (AISI 302)'
+      ],
+      VariantOfDesignOfSupportCoils: 'не поджат не шлиф',
+      WireDiameter: '14',
+      OuterDiameter: '90',
+      FreeLength: '147',
+      WorkNumberOfCoils: '6.5',
+      TotalNumberOfCoils: '8',
+      LengthAtPreDeformation: '130',
+      LengthAtWorkingDeformation: '120',
+      WindingDirection: 'Правое',
+      Covering: [
+        'Без покрытия',
+        'Цинк-ламель',
+        'Гальваническое цинкование радужное',
+        'Гальваническое цинкование бесцветное',
+        'Порошковое',
+        'Грунт-эмаль',
+        'Фосфатирование с промасливанием',
+        'Промасливание'
+      ],
+      Quantity: '100',
       InputStep: 1
     }
   },
   computed: {
-    DiametrSredniy: function () {
-      return (parseInt(this.NaruzhniyF) - parseInt(this.Fprovoloki)).toFixed(2)
+    SpringIndex: function () {
+      return (parseFloat(this.OuterDiameter) - parseFloat(this.WireDiameter)) / parseFloat(this.WireDiameter)
     },
-    DiametrVnutrenniy: function () {
-      return (this.DiametrSredniy - parseInt(this.Fprovoloki)).toFixed(2)
+    SpringStiffness: function () {
+      return (78500 * parseFloat(this.WireDiameter) / 8 / Math.pow(this.SpringIndex, 3)) / parseFloat(this.WorkNumberOfCoils)
     },
-    KolichestvoVitkovPolnoe: function () {
-      return (parseFloat(this.RabocheeChisloVetkov) + 2).toFixed(2)
+    LengthOfTheDeployedSpring: function () {
+      return 3.14 * (parseFloat(this.OuterDiameter) - parseFloat(this.WireDiameter)) *
+        parseFloat(this.TotalNumberOfCoils)
     },
-    PredvaritelnayaNagruzka: function () {
-      return (parseInt(this.ZhestkostPruzhiny) * parseInt(this.VisotaVSvobodnomSostoyanii) - parseInt(this.ZhestkostPruzhiny) * parseInt(this.KontrolnayaVisota)).toFixed(2)
+    LengthAtContactOfCoils: function () {
+      return (parseFloat(this.TotalNumberOfCoils) + 1 - 1.5) * parseFloat(this.WireDiameter)
     },
-    RabochayaNagruzka: function () {
-      return (parseInt(this.ZhestkostPruzhiny) * parseInt(this.VisotaVSvobodnomSostoyanii) - parseInt(this.ZhestkostPruzhiny) * parseInt(this.ControlRabochayaVisota)).toFixed(2)
+    ForceAtMaxDeformations: function () {
+      return (78500 * parseFloat(this.WireDiameter) / 8 / Math.pow(this.SpringIndex, 3)) *
+        (this.Step - parseFloat(this.WireDiameter))
     },
-    MaximalnayaNagruzka: function () {
-      return (parseFloat(this.ZhestkostOdnogoVitkaPruzhiny) * parseFloat(this.MaximalnayaDeformaciyaOdnogoVitka)).toFixed(2)
+    Step: function () {
+      return (parseFloat(this.FreeLength) - (1.5 * parseFloat(this.WireDiameter))) / parseFloat(this.WorkNumberOfCoils)
     },
-    DlinaPriSoprikosnovenii: function () {
-      return (parseInt(this.RabocheeChisloVetkov) * parseFloat(this.Fprovoloki) + parseFloat(this.Fprovoloki)).toFixed(2)
+    SpringMass: function () {
+      return 3.14 * Math.pow(parseFloat(this.WireDiameter), 2) / 4 * this.LengthOfTheDeployedSpring * 7.85 /
+        Math.pow(10, 6)
     },
-    ZhestkostOdnogoVitkaPruzhiny: function () {
-      return (parseInt(this.ModuleSdviga) * Math.pow(parseInt(this.Fprovoloki), 4) / (8 * Math.pow(parseInt(this.NaruzhniyF) - parseInt(this.Fprovoloki), 3))).toFixed(2)
+    SpringBatchWeight: function () {
+      return parseFloat(this.Quantity) * this.SpringMass
     },
-    ZhestkostPruzhiny: function () {
-      return (parseInt(this.ZhestkostOdnogoVitkaPruzhiny) / parseInt(this.RabocheeChisloVetkov)).toFixed(2)
+    ForceAtPreDeformation: function () {
+      return this.SpringStiffness * parseFloat(this.FreeLength) - this.SpringStiffness *
+        parseFloat(this.LengthAtPreDeformation)
     },
-    Shag: function () {
-      return ((parseInt(this.VisotaVSvobodnomSostoyanii) - (1.5 * parseInt(this.Fprovoloki))) / parseInt(this.RabocheeChisloVetkov)).toFixed(2)
-    },
-    RazvertkaPruzhiny: function () {
-      return (3.14 * parseInt(this.DiametrSredniy) * parseInt(this.KolichestvoVitkovPolnoe)).toFixed(2)
-    },
-    MaximalnayaDeformaciyaOdnogoVitka: function () {
-      return (parseInt(this.Shag) - parseInt(this.Fprovoloki)).toFixed(2)
-    },
-    MassaPruzhiny: function () {
-      return (((Math.pow(parseInt(this.Fprovoloki), 2) * 3.14 * parseInt(this.RazvertkaPruzhiny)) / 4000 * 7.85) / 1000).toFixed(2)
-    },
-    VesPartiiPruzhin: function () {
-      return (parseFloat(this.MassaPruzhiny) * parseFloat(this.KolichestvoPartii)).toFixed(2)
+    ForceAtWorkingDeformation: function () {
+      return this.SpringStiffness * parseFloat(this.FreeLength) - this.SpringStiffness *
+        parseFloat(this.LengthAtWorkingDeformation)
     },
     SchemeData: function () {
       return {
-        AverageDiameter: {
-          name: 'Диаметр средний (D ср.)',
-          value: this.DiametrSredniy
+        Material: {
+          name: 'Материал',
+          value: this.MaterialSelect,
+          measure: '',
+          total: false
         },
-        InnerDiameter: {
-          name: 'Диаметр внутренний (D вн.)',
-          value: this.DiametrVnutrenniy
+        SpringIndex: {
+          name: 'Индекс пружины i',
+          value: this.SpringIndex.toFixed(2),
+          measure: 'Н/мм',
+          total: true
         },
-        CoilsQuantityFull: {
-          name: 'Количество витков полное (n1)',
-          value: this.KolichestvoVitkovPolnoe
-        },
-        Preload: {
-          name: 'Предварительная нагрузка (F¹)',
-          value: this.PredvaritelnayaNagruzka
-        },
-        WorkLoad: {
-          name: 'Рабочая нагрузка (F²)',
-          value: this.RabochayaNagruzka
-        },
-        MaxLoad: {
-          name: 'Максимальная нагрузка (F³)',
-          value: this.MaximalnayaNagruzka
-        },
-        CoilsLength: {
-          name: 'Длина при соприкосновении витков (L³)',
-          value: this.DlinaPriSoprikosnovenii
-        },
-        CoilRigidity: {
-          name: 'жесткость одного витка пружины (с1)',
-          value: this.ZhestkostOdnogoVitkaPruzhiny
-        },
-        SpringRigidity: {
+        SpringStiffness: {
           name: 'Жесткость пружины (с)',
-          value: this.ZhestkostPruzhiny
+          value: this.SpringStiffness.toFixed(2),
+          measure: 'мм',
+          total: true
+        },
+        LengthOfTheDeployedSpring: {
+          name: 'Длина развернутой пружины Lразв',
+          value: this.LengthOfTheDeployedSpring.toFixed(2),
+          measure: 'мм',
+          total: true
+        },
+        LengthAtContactOfCoils: {
+          name: 'Длина при соприкосновении витков (L³)',
+          value: this.LengthAtContactOfCoils.toFixed(2),
+          measure: 'мм',
+          total: true
+        },
+        ForceAtMaxDeformations: {
+          name: 'Сила при макс. деформации F3',
+          value: this.ForceAtMaxDeformations.toFixed(2),
+          measure: 'Н',
+          total: true
+        },
+        WorkNumberOfCoils: {
+          name: 'Рабочее число витков n',
+          value: this.WorkNumberOfCoils,
+          measure: '',
+          total: true
+        },
+        TotalNumberOfCoils: {
+          name: 'Полное число витков n1',
+          value: this.TotalNumberOfCoils,
+          measure: '',
+          total: true
         },
         Step: {
           name: 'Шаг (t)',
-          value: this.Shag
+          value: this.Step.toFixed(2),
+          measure: 'мм',
+          total: true
         },
-        SpringSweep: {
-          name: 'Развертка пружины',
-          value: this.RazvertkaPruzhiny
+        WindingDirection: {
+          name: 'Направление навивки',
+          value: this.WindingDirection,
+          measure: '',
+          total: true
         },
-        MaxDeformationOfOneCoil: {
-          name: 'максимальная деформация одного витка',
-          value: this.MaximalnayaDeformaciyaOdnogoVitka
-        },
-        Weight: {
+        SpringMass: {
           name: 'Масса пружины (m1)',
-          value: this.MassaPruzhiny
+          value: this.SpringMass.toFixed(2),
+          measure: 'кг',
+          total: true
         },
-        TotalWeight: {
+        SpringBatchWeight: {
           name: 'Вес партии пружин (m2)',
-          value: this.VesPartiiPruzhin
+          value: this.SpringBatchWeight.toFixed(2),
+          measure: 'кг',
+          total: true
+        },
+        Covering: {
+          name: 'Покрытие',
+          value: this.Covering,
+          measure: '',
+          total: true
+        },
+        ForceAtPreDeformation: {
+          name: 'Сила при предварительной деформ. F1',
+          value: this.ForceAtPreDeformation.toFixed(2),
+          measure: 'Н',
+          total: true
+        },
+        ForceAtWorkingDeformation: {
+          name: 'Сила при рабочей деформ. F2',
+          value: this.ForceAtWorkingDeformation.toFixed(2),
+          measure: 'Н',
+          total: true
+        },
+        LengthAtPreDeformation: {
+          name: 'L1',
+          value: this.LengthAtPreDeformation,
+          measure: '',
+          total: false
+        },
+        LengthAtWorkingDeformation: {
+          name: 'L2',
+          value: this.LengthAtWorkingDeformation,
+          measure: '',
+          total: false
         }
       }
+    },
+    ForTotal: function () {
+      const items = this.SchemeData
+      return Object.keys(items)
+        .map(key => items[key])
+        .filter(item => item.total === true)
     }
   }
 }
 </script>
 
-<style lang="scss" rel="stylesheet" scoped>
+<style lang="scss" rel="stylesheet">
+.style-chooser {
+  --vs-border-width: 0;
+  display: flex;
+  width: 100%;
+  align-items: center;
+  border-radius: 0.25rem;
+  font-weight: 600;
+  border: 1px solid #E5E5E5;
+  background: #F8F8F8;
+  color: #5C5C5C;
+  .vs__dropdown-toggle {
+    width: 100%;
+    border-radius: 3px;
+  }
+}
   .spring {
     &-main {
       &__wrapper {
