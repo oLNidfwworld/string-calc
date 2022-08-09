@@ -1,7 +1,7 @@
 <template>
   <div class="spring-calc__input__wrapper">
-    <label class="font-bold">{{ inputLabel }}</label>
-    <div class="spring-calc__input">
+    <label class="inputs-label">{{ inputLabel }}</label>
+    <div class="spring-calc__input" :class="{'spring-calc__input__error': error}">
       <input class="bg-transparent h-fit w-full px-3 py-2" :placeholder="customPlaceholder" :type="type" :step="customStep"
       v-model="CustomVal" @keypress="isNumber($event)" @input="$emit('update:inputValue', $event.target.value)">
       <div class="spring-calc__input__arrows-wrapper">
@@ -26,19 +26,22 @@ import { ref, watch } from 'vue'
 export default {
   name: 'smart-input',
   props: {
+    error: Boolean,
     disable: Boolean,
     type: String,
     btnType: String,
     customPlaceholder: String,
     customStep: Number,
     inputValue: String,
-    inputLabel: String
+    inputLabel: String,
+    isEmpty: Boolean
   },
   emits: ['update:inputValue'],
   setup (props, { emit }) {
     console.log(props)
     const CustomLabel = ref(props.inputLabel)
     const InputStep = ref(props.customStep)
+    const isEmpty = ref(props.isEmpty)
     const CustomVal = ref(parseFloat(props.inputValue))
     const IncreaseValue = () => {
       CustomVal.value = parseFloat(CustomVal.value) + InputStep.value + ''
@@ -57,10 +60,14 @@ export default {
     }
     watch(CustomVal, (cur, prev) => {
       console.log(cur, prev)
-      if (parseFloat(cur) < 0 || cur === '') {
-        CustomVal.value = 0
+      if (!isEmpty.value) {
+        if (parseFloat(cur) < 0 || cur === '') {
+          CustomVal.value = 0
+        } else {
+          emit('update:inputValue', CustomVal.value)
+        }
       } else {
-        emit('update:inputValue', CustomVal.value)
+        emit('update:inputValue', cur)
       }
     })
     return {
@@ -81,8 +88,11 @@ export default {
     border: 1px solid #E5E5E5;
     background: #F8F8F8;
     color: #5C5C5C;
+    &__error{
+      border: 1px solid crimson;
+    }
     &__wrapper{
-      @apply flex flex-col w-full items-start;
+      @apply flex flex-col w-full items-start justify-between;
     }
     &__arrow{
       @apply rounded;

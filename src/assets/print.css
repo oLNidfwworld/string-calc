@@ -1,0 +1,15 @@
+@media print {
+    .scheme-spring__value {
+        font-size: 16px !important;
+    }
+    .scheme-title{
+        margin-bottom: 20px !important;
+    }
+    .scheme-total__item{
+        flex-direction: row !important;
+    }
+    .scheme-svg {
+        height: 90%;
+        width: 90%;
+    }
+}
