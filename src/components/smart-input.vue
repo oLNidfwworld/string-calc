@@ -1,8 +1,8 @@
 <template>
   <div class="spring-calc__input__wrapper">
-    <label class="inputs-label">{{ inputLabel }}</label>
+    <label class="inputs-label" @click="test">{{ inputLabel }}</label>
     <div class="spring-calc__input" :class="{'spring-calc__input__error': error}">
-      <input class="bg-transparent h-fit w-full px-3 py-2" :placeholder="customPlaceholder" :type="type" :step="customStep"
+      <input class="bg-transparent h-fit w-full px-3 py-2" :placeholder="customPlaceholder" type="number" min="0" :step="customStep"
       v-model="CustomVal" @keypress="isNumber($event)" @input="$emit('update:inputValue', $event.target.value)">
       <div class="spring-calc__input__arrows-wrapper">
         <button class="spring-calc__input__arrow" @click="IncreaseValue()">
@@ -32,7 +32,7 @@ export default {
     btnType: String,
     customPlaceholder: String,
     customStep: Number,
-    inputValue: String,
+    inputValue: [Number, String],
     inputLabel: String,
     isEmpty: Boolean
   },
@@ -44,38 +44,54 @@ export default {
     const isEmpty = ref(props.isEmpty)
     const CustomVal = ref(parseFloat(props.inputValue))
     const IncreaseValue = () => {
-      CustomVal.value = parseFloat(CustomVal.value) + InputStep.value + ''
+      if (!isNaN(CustomVal.value)) {
+        CustomVal.value = parseFloat(CustomVal.value) + InputStep.value
+      } else {
+        CustomVal.value = 0 + InputStep.value
+      }
+      emit('update:inputValue', CustomVal.value)
     }
     const DecreaseValue = () => {
-      CustomVal.value = (parseFloat(CustomVal.value) - InputStep.value) + ''
+      if (!isNaN(CustomVal.value)) {
+        if (CustomVal.value - InputStep.value <= 0) {
+          CustomVal.value = 0
+        } else {
+          CustomVal.value = parseFloat(CustomVal.value) - InputStep.value
+        }
+      } else {
+        CustomVal.value = 0
+      }
+      emit('update:inputValue', CustomVal.value)
     }
     const isNumber = (e) => {
       console.log(e)
-      const keysAllowed = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '.']
+      const keysAllowed = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', ',']
       const keyPressed = e.key
 
       if (!keysAllowed.includes(keyPressed)) {
         e.preventDefault()
       }
     }
-    watch(CustomVal, (cur, prev) => {
+    const test = () => {
+      console.log(props)
+    }
+    watch(() => props.inputValue, (cur, prev) => {
       console.log(cur, prev)
+      CustomVal.value = cur
       if (!isEmpty.value) {
-        if (parseFloat(cur) < 0 || cur === '') {
+        if (cur < 0 || cur === '') {
           CustomVal.value = 0
-        } else {
-          emit('update:inputValue', CustomVal.value)
         }
-      } else {
-        emit('update:inputValue', cur)
       }
+      emit('update:inputValue', CustomVal.value)
     })
     return {
       CustomVal,
       CustomLabel,
       IncreaseValue,
       DecreaseValue,
-      isNumber
+      isNumber,
+      test
     }
   }
 }

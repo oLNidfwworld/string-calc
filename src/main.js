@@ -3,6 +3,8 @@ import App from './App.vue'
 import './assets/styles.css'
 import './assets/print.css'
 import VueHtmlToPaper from './plugins/VueHtmlToPaper'
+import axios from 'axios'
+import VueAxios from 'vue-axios'
 const options = {
   name: '_blank',
   specs: [
@@ -15,5 +17,5 @@ const options = {
   ]
 }
 const app = createApp(App)
-app.use(VueHtmlToPaper, options)
+app.use(VueAxios, axios, VueHtmlToPaper, options)
 app.mount('#app')
