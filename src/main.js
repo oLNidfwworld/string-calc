@@ -5,6 +5,7 @@ import './assets/print.css'
 import VueHtmlToPaper from './plugins/VueHtmlToPaper'
 import axios from 'axios'
 import VueAxios from 'vue-axios'
+import Maska from 'maska'
 const options = {
   name: '_blank',
   specs: [
@@ -17,5 +18,6 @@ const options = {
   ]
 }
 const app = createApp(App)
-app.use(VueAxios, axios, VueHtmlToPaper, options)
+app.use(VueHtmlToPaper, options)
+app.use(VueAxios, axios, Maska)
 app.mount('#app')

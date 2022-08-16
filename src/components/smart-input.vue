@@ -1,6 +1,6 @@
 <template>
   <div class="spring-calc__input__wrapper">
-    <label class="inputs-label" @click="test">{{ inputLabel }}</label>
+    <label class="inputs-label" @click="test">{{ inputLabel }} <span v-if="req === true" class="calc-req">*</span></label>
     <div class="spring-calc__input" :class="{'spring-calc__input__error': error}">
       <input class="bg-transparent h-fit w-full px-3 py-2" :placeholder="customPlaceholder" type="number" min="0" :step="customStep"
       v-model="CustomVal" @keypress="isNumber($event)" @input="$emit('update:inputValue', $event.target.value)">
@@ -34,7 +34,8 @@ export default {
     customStep: Number,
     inputValue: [Number, String],
     inputLabel: String,
-    isEmpty: Boolean
+    isEmpty: Boolean,
+    req: Boolean
   },
   emits: ['update:inputValue'],
   setup (props, { emit }) {

@@ -29,6 +29,10 @@ export default {
 </script>
 
 <style lang="scss" rel="stylesheet/scss">
+@page {
+  size: auto;
+  margin: 0mm;
+}
 .spring-calc {
   &__spring-type{
     @apply rounded;
