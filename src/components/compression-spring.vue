@@ -187,7 +187,7 @@
         </div>
       </div>
       <div class="modal__action">
-        <button class="calc-btn calc-btn__yellow" @click="SendForm">Отправить</button>
+        <button v-if="sendBtnHide === false" class="calc-btn calc-btn__yellow" @click="SendForm">Отправить</button>
         <button class="calc-btn calc-btn__grey" @click="ShowModal = false">Закрыть</button>
       </div>
     </vue-final-modal>
@@ -264,7 +264,8 @@ export default {
       Name: '',
       Email: '',
       Phone: '',
-      Comm: ''
+      Comm: '',
+      sendBtnHide: false
     }
   },
   methods: {
@@ -273,6 +274,7 @@ export default {
     },
     SendForm () {
       if (this.CheckErrors.length === 0 && this.Errors.Phone === false) {
+        this.sendBtnHide = true
         const opt = {
           margin: 0,
           filename: 'чертеж_пружины.pdf',
@@ -322,9 +324,12 @@ export default {
           this.axios.post(document.location.href.split('?')[0] + 'ajax.php', send).then((response) => {
             if (response.data.status === 'success') {
               this.ShowModal = false
+              this.sendBtnHide = false
               this.SuccessText = response.data.statusText
               this.ShowSuccess = true
               console.log(response.data)
+            } else {
+              this.sendBtnHide = false
             }
           })
         })
@@ -602,8 +607,8 @@ export default {
     color: #5C5C5C;
   }
 }
-.vs1__listbox > li:before{
-  content: "" !important;
+.vs__dropdown-option::before{
+  content: unset !important;
   display: none !important;
 }
   .inputs{
@@ -685,7 +690,7 @@ export default {
       &-main {
         &__wrapper {
           @apply grid;
-          grid-template-columns: 0.8fr 1fr;
+          grid-template-columns: 0.9fr 1fr;
           gap: 20px;
         }
       }
@@ -704,7 +709,7 @@ export default {
         background: #5C5C5C;
       }
       &__yellow {
-        background: #ecd93c;
+        background: #ffea3b;
         color: #000;
         font-weight: 700;
       }
