@@ -1,9 +1,17 @@
 <template>
   <div class="spring-calc__input__wrapper">
-    <label class="inputs-label" @click="test">{{ inputLabel }} <span v-if="req === true" class="calc-req">*</span></label>
+    <label class="inputs-label">{{ inputLabel }} <span v-if="req === true" class="calc-req">*</span></label>
     <div class="spring-calc__input" :class="{'spring-calc__input__error': error}">
-      <input class="bg-transparent h-fit w-full px-3 py-2" :placeholder="customPlaceholder" type="number" min="0" :step="customStep"
-      v-model="CustomVal" @keypress="isNumber($event)" @input="$emit('update:inputValue', $event.target.value)">
+      <input class="bg-transparent h-fit w-full px-3 py-2"
+             :placeholder="customPlaceholder"
+             type="number"
+             min="0"
+             :step="customStep"
+             @keypress="isNumber($event)"
+             :value="inputValue"
+             @input="UpdateInput"
+             @change="UpdateInput"
+      >
       <div class="spring-calc__input__arrows-wrapper">
         <button class="spring-calc__input__arrow" @click="IncreaseValue()">
           <svg width="11" height="9" viewBox="0 0 11 9" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -21,7 +29,7 @@
 </template>
 
 <script>
-import { ref, watch } from 'vue'
+import { ref } from 'vue'
 
 export default {
   name: 'smart-input',
@@ -39,25 +47,25 @@ export default {
   },
   emits: ['update:inputValue'],
   setup (props, { emit }) {
-    console.log(props)
     const CustomLabel = ref(props.inputLabel)
     const InputStep = ref(props.customStep)
     const isEmpty = ref(props.isEmpty)
-    const CustomVal = ref(parseFloat(props.inputValue))
+    const CustomVal = ref(props.inputValue)
     const IncreaseValue = () => {
       if (!isNaN(CustomVal.value)) {
-        CustomVal.value = parseFloat(CustomVal.value) + InputStep.value
+        CustomVal.value = parseFloat(props.inputValue) + InputStep.value
       } else {
         CustomVal.value = 0 + InputStep.value
       }
+      console.log(CustomVal.value)
       emit('update:inputValue', CustomVal.value)
     }
     const DecreaseValue = () => {
-      if (!isNaN(CustomVal.value)) {
-        if (CustomVal.value - InputStep.value <= 0) {
+      if (!isNaN(props.inputValue)) {
+        if (props.inputValue - InputStep.value <= 0) {
           CustomVal.value = 0
         } else {
-          CustomVal.value = parseFloat(CustomVal.value) - InputStep.value
+          CustomVal.value = parseFloat(props.inputValue) - InputStep.value
         }
       } else {
         CustomVal.value = 0
@@ -73,26 +81,27 @@ export default {
         e.preventDefault()
       }
     }
-    const test = () => {
-      console.log(props)
-    }
-    watch(() => props.inputValue, (cur, prev) => {
-      console.log(cur, prev)
-      CustomVal.value = cur
+    const UpdateInput = (e) => {
+      CustomVal.value = parseFloat(e.target.value.toString().replace(/^0[0+]/, ''))
+      console.log(e.target.value)
       if (!isEmpty.value) {
-        if (cur < 0 || cur === '') {
+        if (CustomVal.value < 0 || CustomVal.value === '' || CustomVal.value.length < 1 || isNaN(CustomVal.value)) {
           CustomVal.value = 0
+        }
+      } else {
+        if (isNaN(CustomVal.value)) {
+          CustomVal.value = ''
         }
       }
       emit('update:inputValue', CustomVal.value)
-    })
+    }
     return {
       CustomVal,
       CustomLabel,
       IncreaseValue,
       DecreaseValue,
       isNumber,
-      test
+      UpdateInput
     }
   }
 }

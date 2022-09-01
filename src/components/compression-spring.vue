@@ -6,9 +6,10 @@
            <label class="inputs-label">Материал: <span class="calc-req">*</span></label>
            <vSelect class="style-chooser" :options="Material" v-model="SelectedMaterial" :clearable="false" label="title">
              <template #search="{attributes, events}">
-               <input v-bind="attributes" v-on="events"
-                 disabled
-                 class="vs__search hidden"
+               <input v-bind="attributes"
+                      v-on="events"
+                      disabled
+                      class="vs__search hidden"
                />
              </template>
              <template #open-indicator="">
@@ -71,15 +72,15 @@
              </template>
            </vSelect>
          </div>
-         <smart-input inputLabel="Диаметр проволоки мм:" :req="true" custom-placeholder="Enter the number"
+         <smart-input inputLabel="Диаметр проволоки мм:" :req="true" custom-placeholder="Введите значение"
          btn-type="number" :custom-step="InputStep" v-model:inputValue="WireDiameter" />
-         <smart-input inputLabel="Наружний диаметр мм:" :req="true" custom-placeholder="Enter the number"
+         <smart-input inputLabel="Наружний диаметр мм:" :req="true" custom-placeholder="Введите значение"
          btn-type="number" :custom-step="InputStep" v-model:inputValue="OuterDiameter" />
-         <smart-input inputLabel="Длина в свободном состоянии Lo:" :req="true" custom-placeholder="Enter the number"
+         <smart-input inputLabel="Длина в свободном состоянии Lo:" :req="true" custom-placeholder="Введите значение"
          btn-type="number" :custom-step="InputStep" v-model:inputValue="FreeLength" :error="Errors.FreeLength" />
-         <smart-input inputLabel="Рабочее число витков n:" :req="true" custom-placeholder="Enter the number"
-         btn-type="number" :custom-step="InputStep" v-model:inputValue="WorkNumberOfCoils" />
-         <smart-input inputLabel="Полное число витков n1:" custom-placeholder="Enter the number"
+         <smart-input inputLabel="Рабочее число витков n:" :req="true" custom-placeholder="Введите значение"
+         btn-type="number" :custom-step="InputStep" v-model:inputValue="WorkNumberOfCoils" @update:inputValue="ChangeTotalCoils"/>
+         <smart-input inputLabel="Полное число витков n1:" custom-placeholder="Введите значение"
          btn-type="number" :custom-step="InputStep" v-model:inputValue="TotalNumberOfCoils" />
          <smart-input inputLabel="Длина при предварительной деформации L1:" custom-placeholder="Введите число (дополнительно)"
          btn-type="number" :custom-step="InputStep" v-model:inputValue="LengthAtPreDeformation" :error="Errors.LengthAtPreDeformation" :isEmpty="true"/>
@@ -112,18 +113,26 @@
              </template>
            </vSelect>
          </div>
-         <smart-input inputLabel="Количество шт.:" :req="true" custom-placeholder="Enter the number"
+         <smart-input inputLabel="Количество шт.:" :req="true" custom-placeholder="Введите значение"
          btn-type="number" :custom-step="InputStep" v-model:inputValue="Quantity" />
-      <!--   <smart-input inputLabel="Рабочее число витков n:" custom-placeholder="Enter the number"-->
-      <!--   btn-type="text" :custom-step="InputStep" v-model:inputValue="KontrolnayaRabochayaVisota" />-->
        </div>
       <div class="flex flex-wrap justify-between w-full items-center">
         <div class="grid grid-cols-1 sm:grid-cols-3 justify-items-center sm:justify-items-start gap-3 w-full sm:w-fit mb-4">
-          <button v-if="CheckErrors.length === 0" class="calc-btn calc-btn__yellow cursor-pointer" @click="ShowModal = true">Заказать</button>
-          <button class="calc-btn calc-btn__grey" @click="ToPrint">Распечатать</button>
-          <button class="calc-btn calc-btn__grey" @click="exportToPDF">Скачать</button>
+          <transition name="left-slide">
+          <button v-if="CheckErrors.length === 0" class="calc-btn calc-btn__yellow cursor-pointer" @click="ShowModal = true; FormType = 'Scheme'">Заказать</button>
+          </transition>
+          <button class="calc-btn calc-btn__yellow" @click="ToPrint">Распечатать</button>
+          <button class="calc-btn calc-btn__yellow" @click="exportToPDF">Скачать</button>
         </div>
         <button class="calc-btn__reset w-fit mb-3" @click="resetValues">Перейти к новому расчету</button>
+        <div>
+          <p class="text-start mb-2">
+            Расчетные данные калькулятора несут исключительно информационный характер
+            <br>
+            Если Вам нужен нестандартный вариант пружин - оставьте заявку нажав на кнопку ниже.
+          </p>
+          <span class="calc-btn calc-btn__yellow sm:w-fit w-full" @click="ShowModal = true; FormType = 'SpecialSpring'"> Оставить заявку </span>
+        </div>
       </div>
     </div>
     <div id="scheme-print" ref="document" class="scheme-outer-wrapper">
@@ -157,7 +166,7 @@
         </i>
       </button>
       <span class="modal__title mb-5">Заказать пружины</span>
-      <p>Укажите номер телефона, мы получим Ваш чертеж и свяжемся с Вами</p>
+      <p>{{ FormText }}</p>
       <div class="modal__content grid grid-cols-1 gap-3">
         <div class="flex flex-col">
           <label class="inputs-label mb-2">Имя</label>
@@ -265,62 +274,91 @@ export default {
       Email: '',
       Phone: '',
       Comm: '',
-      sendBtnHide: false
+      sendBtnHide: false,
+      FormType: 'Scheme'
     }
   },
   methods: {
     ToPrint () {
       this.$htmlToPaper('scheme-print', { specs: ['fullscreen=yes', 'titlebar=no', 'scrollbars=no'] })
     },
+    ChangeTotalCoils () {
+      this.TotalNumberOfCoils = parseFloat(this.WorkNumberOfCoils) + 2
+    },
     SendForm () {
-      if (this.CheckErrors.length === 0 && this.Errors.Phone === false) {
-        this.sendBtnHide = true
-        const opt = {
-          margin: 0,
-          filename: 'чертеж_пружины.pdf',
-          image: {
-            type: 'jpeg',
-            quality: 2
-          },
-          jsPDF: {
-            units: 'pt',
-            format: 'A4',
-            orientation: 'p',
-            putOnlyUsedFonts: true,
-            floatPrecision: 20
+      if (this.FormType === 'Scheme') {
+        if (this.CheckErrors.length === 0 && this.Errors.Phone === false) {
+          this.sendBtnHide = true
+          const opt = {
+            margin: 0,
+            filename: 'чертеж_пружины.pdf',
+            image: {
+              type: 'jpeg',
+              quality: 2
+            },
+            jsPDF: {
+              units: 'pt',
+              format: 'A4',
+              orientation: 'p',
+              putOnlyUsedFonts: true,
+              floatPrecision: 20
+            }
           }
+          /* Для узких экранов запоминаем разрешение и ставим его побольше чтобы корректно сгенерировался PDF */
+          const curRes = window.innerWidth
+          window.innerWidth = 1600
+          html2pdf().set(opt).from(this.$refs.document).outputPdf().then((pdfAsString) => {
+            const send = new FormData()
+            send.append('InnerDiameter', parseFloat(this.InnerDiameter).toFixed(2))
+            send.append('OuterDiameter', parseFloat(this.OuterDiameter).toFixed(2))
+            send.append('Material', this.SelectedMaterial)
+            send.append('SpringIndex', parseFloat(this.SpringIndex).toFixed(2))
+            send.append('SpringStiffness', parseFloat(this.SpringStiffness).toFixed(2))
+            send.append('FreeLength', parseFloat(this.FreeLength).toFixed(2))
+            send.append('LengthOfTheDeployedSpring', parseFloat(this.LengthOfTheDeployedSpring).toFixed(2))
+            send.append('LengthAtContactOfCoils', parseFloat(this.LengthAtContactOfCoils).toFixed(2))
+            send.append('ForceAtMaxDeformations', parseFloat(this.ForceAtMaxDeformations).toFixed(2))
+            send.append('WorkNumberOfCoils', parseFloat(this.WorkNumberOfCoils).toFixed(2))
+            send.append('TotalNumberOfCoils', parseFloat(this.TotalNumberOfCoils).toFixed(2))
+            send.append('Step', parseFloat(this.Step).toFixed(2))
+            send.append('WindingDirection', this.WindingDirection === 0 ? 'левое' : 'правое')
+            send.append('SpringMass', parseFloat(this.SpringMass).toFixed(2))
+            send.append('SpringBatchWeight', parseFloat(this.SpringBatchWeight).toFixed(2))
+            send.append('Covering', this.SelectedCovering)
+            send.append('ForceAtPreDeformation', parseFloat(this.ForceAtPreDeformation).toFixed(2))
+            send.append('ForceAtWorkingDeformation', parseFloat(this.ForceAtWorkingDeformation).toFixed(2))
+            send.append('LengthAtPreDeformation', parseFloat(this.LengthAtPreDeformation).toFixed(2))
+            send.append('LengthAtWorkingDeformation', parseFloat(this.LengthAtWorkingDeformation).toFixed(2))
+            send.append('WireDiameter', parseFloat(this.WireDiameter).toFixed(2))
+            send.append('Name', this.Name)
+            send.append('Phone', this.Phone)
+            send.append('Email', this.Email)
+            send.append('Comm', this.Comm)
+            send.append('files', btoa(pdfAsString))
+            this.axios.post(document.location.href.split('?')[0] + 'ajax.php', send).then((response) => {
+              if (response.data.status === 'success') {
+                this.ShowModal = false
+                this.sendBtnHide = false
+                this.SuccessText = response.data.statusText
+                this.ShowSuccess = true
+                console.log(response.data)
+              } else {
+                this.sendBtnHide = false
+              }
+            })
+          })
+          window.innerWidth = curRes
         }
-        /* Для узких экранов запоминаем разрешение и ставим его побольше чтобы корректно сгенерировался PDF */
-        const curRes = window.innerWidth
-        window.innerWidth = 1600
-        html2pdf().set(opt).from(this.$refs.document).outputPdf().then((pdfAsString) => {
+      }
+      if (this.FormType === 'SpecialSpring') {
+        if (this.Errors.Phone === false) {
+          this.sendBtnHide = true
           const send = new FormData()
-          send.append('InnerDiameter', parseFloat(this.InnerDiameter).toFixed(2))
-          send.append('OuterDiameter', parseFloat(this.OuterDiameter).toFixed(2))
-          send.append('Material', this.SelectedMaterial)
-          send.append('SpringIndex', parseFloat(this.SpringIndex).toFixed(2))
-          send.append('SpringStiffness', parseFloat(this.SpringStiffness).toFixed(2))
-          send.append('FreeLength', parseFloat(this.FreeLength).toFixed(2))
-          send.append('LengthOfTheDeployedSpring', parseFloat(this.LengthOfTheDeployedSpring).toFixed(2))
-          send.append('LengthAtContactOfCoils', parseFloat(this.LengthAtContactOfCoils).toFixed(2))
-          send.append('ForceAtMaxDeformations', parseFloat(this.ForceAtMaxDeformations).toFixed(2))
-          send.append('WorkNumberOfCoils', parseFloat(this.WorkNumberOfCoils).toFixed(2))
-          send.append('TotalNumberOfCoils', parseFloat(this.TotalNumberOfCoils).toFixed(2))
-          send.append('Step', parseFloat(this.Step).toFixed(2))
-          send.append('WindingDirection', this.WindingDirection === 0 ? 'левое' : 'правое')
-          send.append('SpringMass', parseFloat(this.SpringMass).toFixed(2))
-          send.append('SpringBatchWeight', parseFloat(this.SpringBatchWeight).toFixed(2))
-          send.append('Covering', this.SelectedCovering)
-          send.append('ForceAtPreDeformation', parseFloat(this.ForceAtPreDeformation).toFixed(2))
-          send.append('ForceAtWorkingDeformation', parseFloat(this.ForceAtWorkingDeformation).toFixed(2))
-          send.append('LengthAtPreDeformation', parseFloat(this.LengthAtPreDeformation).toFixed(2))
-          send.append('LengthAtWorkingDeformation', parseFloat(this.LengthAtWorkingDeformation).toFixed(2))
-          send.append('WireDiameter', parseFloat(this.WireDiameter).toFixed(2))
           send.append('Name', this.Name)
           send.append('Phone', this.Phone)
           send.append('Email', this.Email)
           send.append('Comm', this.Comm)
-          send.append('files', btoa(pdfAsString))
+          send.append('SpecialSpring', true)
           this.axios.post(document.location.href.split('?')[0] + 'ajax.php', send).then((response) => {
             if (response.data.status === 'success') {
               this.ShowModal = false
@@ -332,8 +370,7 @@ export default {
               this.sendBtnHide = false
             }
           })
-        })
-        window.innerWidth = curRes
+        }
       }
     },
     async exportToPDF () {
@@ -442,13 +479,13 @@ export default {
         SpringIndex: {
           name: 'Индекс пружины i',
           value: parseFloat(this.SpringIndex).toFixed(2),
-          measure: 'Н/мм',
+          measure: '',
           total: true
         },
         SpringStiffness: {
           name: 'Жесткость пружины (с)',
           value: parseFloat(this.SpringStiffness).toFixed(2),
-          measure: 'мм',
+          measure: 'Н/мм',
           total: true
         },
         FreeLength: {
@@ -543,7 +580,7 @@ export default {
         },
         WireDiameter: {
           name: 'Диаметр проволоки',
-          value: parseFloat(this.WireDiameter).toFixed(2),
+          value: parseFloat(this.WireDiameter, 10).toFixed(2),
           measure: 'мм',
           total: false
         }
@@ -559,15 +596,17 @@ export default {
       const items = this.SchemeData
       return Object.keys(items)
         .map(key => items[key])
-        .filter(item => item.measure !== false && item.value.length !== 0 && (isNaN(item.value) || parseFloat(item.value) < 0))
+        .filter(item => item.measure !== false && item.value.length !== 0 && (isNaN(item.value) || parseFloat(item.value) <= 0))
+    },
+    FormText: function () {
+      return this.FormType === 'Scheme'
+        ? 'Укажите номер телефона, мы получим Ваш чертеж и свяжемся с Вами'
+        : 'Укажите номер телефона и опишите какую пружину вы бы хотели заказать, мы получим Ваше сообщение и свяжемся с Вами'
     }
   },
   watch: {
     Phone (cur) {
       this.Errors.Phone = cur.replace(/[^0-9]/g, '').length <= 10
-      console.log(cur)
-      console.log(cur.replace(/[^0-9]/g, '').length)
-      console.log(this.Errors.Phone)
     }
   },
   mounted () {
@@ -627,8 +666,8 @@ export default {
         width: 21px;
       }
       &__selected {
-        background: #A3A3A3;
-        color: #FFFF;
+        background: #ffea3b;
+        color: #000;
         .inputs-radio__marker::before {
           @apply rounded-full;
           content: "";
@@ -658,6 +697,7 @@ export default {
   .scheme {
     &-inner {
       &-wrapper {
+        @apply relative;
         border: 3px solid #1D1F23;
       }
     }
@@ -702,7 +742,7 @@ export default {
   }
   .calc {
     &-btn {
-      @apply flex items-center justify-center px-6 py-3 text-white w-full;
+      @apply flex items-center justify-center px-6 py-3 text-white w-full relative cursor-pointer;
       border: 0px solid #5C5C5C;
       border-radius: 3px;
       &__grey {
@@ -768,6 +808,53 @@ export default {
   position: absolute;
   top: 0.5rem;
   right: 0.5rem;
+}
+.left-slide-enter-active,
+.left-slide-leave-active {
+  transition: All 0.3s ease-in-out;
+}
+.left-slide-leave-to,.left-slide-enter-from {
+  opacity: 0;
+  transform: translateX(-20px);
+}
+
+@media screen and (min-width: 768px) and (max-width: 1023px), screen and (min-width: 1280px) {
+  .spring-inputs > :nth-child(1){
+    order: 1;
+  }
+  .spring-inputs > :nth-child(2){
+    order: 3;
+  }
+  .spring-inputs > :nth-child(3){
+    order: 5;
+  }
+  .spring-inputs > :nth-child(4){
+    order: 7;
+  }
+  .spring-inputs > :nth-child(5){
+    order: 9;
+  }
+  .spring-inputs > :nth-child(6){
+    order: 11;
+  }
+  .spring-inputs > :nth-child(7){
+    order: 2;
+  }
+  .spring-inputs > :nth-child(8){
+    order: 4;
+  }
+  .spring-inputs > :nth-child(9){
+    order: 6;
+  }
+  .spring-inputs > :nth-child(10){
+    order: 8;
+  }
+  .spring-inputs > :nth-child(11){
+    order: 10;
+  }
+  .spring-inputs > :nth-child(12){
+    order: 12;
+  }
 }
 </style>
 
