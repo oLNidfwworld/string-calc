@@ -57,7 +57,6 @@ export default {
       } else {
         CustomVal.value = 0 + InputStep.value
       }
-      console.log(CustomVal.value)
       emit('update:inputValue', CustomVal.value)
     }
     const DecreaseValue = () => {
@@ -73,7 +72,6 @@ export default {
       emit('update:inputValue', CustomVal.value)
     }
     const isNumber = (e) => {
-      console.log(e)
       const keysAllowed = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', ',']
       const keyPressed = e.key
 
@@ -83,7 +81,6 @@ export default {
     }
     const UpdateInput = (e) => {
       CustomVal.value = parseFloat(e.target.value.toString().replace(/^0[0+]/, ''))
-      console.log(e.target.value)
       if (!isEmpty.value) {
         if (CustomVal.value < 0 || CustomVal.value === '' || CustomVal.value.length < 1 || isNaN(CustomVal.value)) {
           CustomVal.value = 0

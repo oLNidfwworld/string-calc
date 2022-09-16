@@ -189,12 +189,9 @@
 
 <script>
 export default {
-  name: 'scheme-spring',
+  name: 'SchemeCompressionSpringPressedNotPolished',
   props: {
     SchemeData: Object
-  },
-  mounted () {
-    console.log(this.SchemeData)
   }
 }
 </script>

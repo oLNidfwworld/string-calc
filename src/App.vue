@@ -1,13 +1,13 @@
 <template>
   <div class="flex justify-center">
     <div class="container">
-      <spring-calc/>
+      <SpringCalc/>
     </div>
   </div>
 </template>
 
 <script>
-import SpringCalc from '@/components/spring-calc'
+import SpringCalc from '@/components/SpringCalc'
 
 export default {
   name: 'App',

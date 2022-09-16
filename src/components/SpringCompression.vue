@@ -119,7 +119,7 @@
       <div class="flex flex-wrap justify-between w-full items-center">
         <div class="grid grid-cols-1 sm:grid-cols-3 justify-items-center sm:justify-items-start gap-3 w-full sm:w-fit mb-4">
           <transition name="left-slide">
-          <button v-if="CheckErrors.length === 0" class="calc-btn calc-btn__yellow cursor-pointer" @click="ShowModal = true; FormType = 'Scheme'">Заказать</button>
+          <button v-if="CheckErrors.length === 0" class="calc-btn calc-btn__yellow cursor-pointer" @click="ShowModal = true; FormType = 'compression'">Заказать</button>
           </transition>
           <button class="calc-btn calc-btn__yellow" @click="ToPrint">Распечатать</button>
           <button class="calc-btn calc-btn__yellow" @click="exportToPDF">Скачать</button>
@@ -147,14 +147,7 @@
           <SchemeCompressionSpringNotPressedNotPolished v-if="SelectedVariantOfDesignOfSupportCoils === VariantOfDesignOfSupportCoils[2]" :SchemeData="SchemeData"/>
         </div>
         <div class="">
-          <div v-for="item in ForTotal" class="scheme-total__item my-1" :key="item.id">
-            <span>
-              {{ item.name }}
-            </span>
-            <span>
-              {{ item.value }} {{ item.measure !== false ? item.measure : '' }}
-            </span>
-          </div>
+          <TotalTable :items="ForTotal"/>
         </div>
       </div>
       </div>
@@ -223,10 +216,13 @@ import html2pdf from 'html2pdf.js'
 import { VueFinalModal } from 'vue-final-modal'
 import { maska } from 'maska'
 import 'vue-select/dist/vue-select.css'
+import { useFilterTotal, useFilterError, useConvertToPDF, useFormText } from '@/plugins/functions'
+import TotalTable from '@/components/TotalTable'
 
 export default {
-  name: 'compression-spring',
+  name: 'SpringCompression',
   components: {
+    TotalTable,
     SchemeCompressionSpringPressedPolished,
     SchemeCompressionSpringPressedNotPolished,
     SchemeCompressionSpringNotPressedNotPolished,
@@ -275,7 +271,7 @@ export default {
       Phone: '',
       Comm: '',
       sendBtnHide: false,
-      FormType: 'Scheme'
+      FormType: 'compression'
     }
   },
   methods: {
@@ -286,7 +282,7 @@ export default {
       this.TotalNumberOfCoils = parseFloat(this.WorkNumberOfCoils) + 2
     },
     SendForm () {
-      if (this.FormType === 'Scheme') {
+      if (this.FormType === 'compression') {
         if (this.CheckErrors.length === 0 && this.Errors.Phone === false) {
           this.sendBtnHide = true
           const opt = {
@@ -309,6 +305,8 @@ export default {
           window.innerWidth = 1600
           html2pdf().set(opt).from(this.$refs.document).outputPdf().then((pdfAsString) => {
             const send = new FormData()
+            send.append('key', 'v7WIMOidp9ueH3Lt')
+            send.append('SpringType', this.FormType)
             send.append('InnerDiameter', parseFloat(this.InnerDiameter).toFixed(2))
             send.append('OuterDiameter', parseFloat(this.OuterDiameter).toFixed(2))
             send.append('Material', this.SelectedMaterial)
@@ -354,6 +352,8 @@ export default {
         if (this.Errors.Phone === false) {
           this.sendBtnHide = true
           const send = new FormData()
+          send.append('key', 'v7WIMOidp9ueH3Lt')
+          send.append('SpringType', this.FormType)
           send.append('Name', this.Name)
           send.append('Phone', this.Phone)
           send.append('Email', this.Email)
@@ -374,16 +374,7 @@ export default {
       }
     },
     async exportToPDF () {
-      /* Для узких экранов запоминаем разрешение и ставим его побольше чтобы корректно сгенерировался PDF */
-      const curRes = window.innerWidth
-      window.innerWidth = 1600
-      await html2pdf(this.$refs.document, {
-        margin: 0,
-        filename: 'чертеж_пружины.pdf',
-        image: { type: 'jpeg', quality: 2 },
-        jsPDF: { units: 'pt', format: 'A4', orientation: 'p', putOnlyUsedFonts: true, floatPrecision: 20 }
-      })
-      window.innerWidth = curRes
+      await useConvertToPDF(this.$refs.document)
     },
     resetValues () {
       this.WireDiameter = 0
@@ -580,28 +571,20 @@ export default {
         },
         WireDiameter: {
           name: 'Диаметр проволоки',
-          value: parseFloat(this.WireDiameter, 10).toFixed(2),
+          value: parseFloat(this.WireDiameter).toFixed(2),
           measure: 'мм',
           total: false
         }
       }
     },
     ForTotal: function () {
-      const items = this.SchemeData
-      return Object.keys(items)
-        .map(key => items[key])
-        .filter(item => item.total === true)
+      return useFilterTotal(this.SchemeData)
     },
     CheckErrors: function () {
-      const items = this.SchemeData
-      return Object.keys(items)
-        .map(key => items[key])
-        .filter(item => item.measure !== false && item.value.length !== 0 && (isNaN(item.value) || parseFloat(item.value) <= 0))
+      return useFilterError(this.SchemeData)
     },
     FormText: function () {
-      return this.FormType === 'Scheme'
-        ? 'Укажите номер телефона, мы получим Ваш чертеж и свяжемся с Вами'
-        : 'Укажите номер телефона и опишите какую пружину вы бы хотели заказать, мы получим Ваше сообщение и свяжемся с Вами'
+      return useFormText(this.FormType)
     }
   },
   watch: {
@@ -705,15 +688,6 @@ export default {
       &-wrapper{
         @apply md:py-6 md:px-7 h-fit;
         border: 1px solid #1D1F23;
-      }
-    }
-    &-total
-    {
-      &__item{
-        @apply flex border-solid border-t-2 border-black justify-between px-5 flex-col md:flex-row print:flex-row;
-        & span:first-child {
-          font-weight: 500;
-        }
       }
     }
     &-watermark{
