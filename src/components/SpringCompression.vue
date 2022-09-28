@@ -3,7 +3,7 @@
     <div>
        <div class="spring-inputs mb-5">
          <div class="flex w-full flex-col items-start justify-between">
-           <label class="inputs-label">Материал: <span class="calc-req">*</span></label>
+           <label class="inputs-label" @click="test">Материал: <span class="calc-req">*</span></label>
            <vSelect class="style-chooser" :options="Material" v-model="SelectedMaterial" :clearable="false" label="title">
              <template #search="{attributes, events}">
                <input v-bind="attributes"
@@ -18,7 +18,7 @@
            </vSelect>
          </div>
          <div class="flex w-full flex-col items-start justify-between">
-           <label class="inputs-label">Вариант оформления опорных витков: <span class="calc-req">*</span></label>
+           <label class="inputs-label" @click="test1">Вариант оформления опорных витков: <span class="calc-req">*</span></label>
            <vSelect class="style-chooser" :options="VariantOfDesignOfSupportCoils" v-model="SelectedVariantOfDesignOfSupportCoils" :clearable="false" label="title">
              <template v-slot:option="VariantOfDesignOfSupportCoils">
                <div class="flex flex-col items-center py-1">
@@ -141,7 +141,7 @@
           <span class="scheme-watermark">https://wollter.ru</span>
           <span class="scheme-title">Расчет пружин сжатия</span>
         </div>
-        <div class="scheme-spring px-3 xl:px-20 mb-5">
+        <div class="scheme-spring mb-5">
           <SchemeCompressionSpringPressedPolished v-if="SelectedVariantOfDesignOfSupportCoils === VariantOfDesignOfSupportCoils[0]" :SchemeData="SchemeData"/>
           <SchemeCompressionSpringPressedNotPolished v-if="SelectedVariantOfDesignOfSupportCoils === VariantOfDesignOfSupportCoils[1]" :SchemeData="SchemeData"/>
           <SchemeCompressionSpringNotPressedNotPolished v-if="SelectedVariantOfDesignOfSupportCoils === VariantOfDesignOfSupportCoils[2]" :SchemeData="SchemeData"/>
@@ -207,6 +207,7 @@
 </template>
 
 <script>
+/* eslint-disable */
 import SmartInput from '@/components/smart-input'
 import SchemeCompressionSpringPressedPolished from '@/components/SchemeCompressionSpringPressedPolished'
 import SchemeCompressionSpringPressedNotPolished from '@/components/SchemeCompressionSpringPressedNotPolished'
@@ -216,8 +217,22 @@ import html2pdf from 'html2pdf.js'
 import { VueFinalModal } from 'vue-final-modal'
 import { maska } from 'maska'
 import 'vue-select/dist/vue-select.css'
-import { useFilterTotal, useFilterError, useConvertToPDF, useFormText } from '@/plugins/functions'
+import {
+  useFilterTotal,
+  useFilterError,
+  useConvertToPDF,
+  useFormText,
+  toDataURL,
+  ConvertToPDF, DownloadToPDF
+} from '@/plugins/functions'
 import TotalTable from '@/components/TotalTable'
+import JsPDF from 'jspdf'
+import AutoTable from 'jspdf-autotable'
+import GOST_A from '@/assets/fonts/GOST_A-normal.js'
+import * as pdfMake from 'pdfmake'
+import pdfFonts from "pdfmake/build/vfs_fonts"
+import htmlToPdfmake from "html-to-pdfmake"
+import html2canvas from "html2canvas"
 
 export default {
   name: 'SpringCompression',
@@ -271,7 +286,14 @@ export default {
       Phone: '',
       Comm: '',
       sendBtnHide: false,
-      FormType: 'compression'
+      FormType: 'compression',
+      doc: null,
+      kek: {
+        coin: '1sgrs',
+        game_group: 'GameGroup'
+      },
+      kekres: [],
+      watermark: ''
     }
   },
   methods: {
@@ -375,6 +397,36 @@ export default {
     },
     async exportToPDF () {
       await useConvertToPDF(this.$refs.document)
+    },
+    test () {
+      let arRes = []
+      this.kekres.push(Object.assign({}, this.kek))
+      this.doc.addFileToVFS('GOST_A-normal.ttf', GOST_A)
+      this.doc.setFont('GOST_A')
+      this.doc.rect(5, 5, this.doc.internal.pageSize.width - 10, this.doc.internal.pageSize.height - 10, 'S')
+      this.doc.text('hello kitty азазаа', 10, 10, null, null, 'center')
+      this.doc.text('This is centred text.', 105, 80, null, null, 'center')
+      Object.entries(this.ForTotal).map((key) => {
+        console.log(arRes)
+        arRes.push([key[1].name, key[1].value])
+        return console.log(arRes)
+      })
+      AutoTable(this.doc, {
+        columnStyles: { 0: { halign: 'center', fillColor: [255, 255, 255] }, 1: { halign: 'center', fillColor: [255, 255, 255] } },
+        head: [],
+        body: arRes
+      })
+      this.doc.save()
+    },
+    async test1 () {
+      let arRes = []
+      Object.entries(this.ForTotal).map((key) => {
+        console.log(arRes)
+        arRes.push([key[1].name, key[1].value])
+      })
+      let ee = await DownloadToPDF(this.$el.querySelector('.scheme-svg'), this.$el.querySelector('.scheme-spring'), this.watermark, arRes)
+      console.log(ee)
+
     },
     resetValues () {
       this.WireDiameter = 0
@@ -596,6 +648,13 @@ export default {
     this.SelectedCovering = this.Covering[0]
     this.SelectedVariantOfDesignOfSupportCoils = this.VariantOfDesignOfSupportCoils[0]
     this.SelectedMaterial = this.Material[0]
+    this.doc = new JsPDF()
+    pdfMake.vfs = pdfFonts.pdfMake.vfs
+    toDataURL('https://wollter.ru/upload/img/watermarkbg.png',
+      (dataUrl) => {
+        this.watermark = dataUrl
+      }
+    )
   }
 }
 </script>

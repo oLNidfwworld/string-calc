@@ -164,7 +164,7 @@
           <SchemeTensionTangent v-if="SelectedTypeOfHook === TypeOfHook[3]" :SchemeData="SchemeData" />
           <SchemeTensionExtendedHook v-if="SelectedTypeOfHook === TypeOfHook[4]" :SchemeData="SchemeData"/>
         </div>
-        <div class="">
+        <div ref="test" class="">
           <TotalTable :items="ForTotal"/>
         </div>
       </div>
@@ -295,7 +295,8 @@ export default {
       Phone: '',
       Comm: '',
       sendBtnHide: false,
-      FormType: 'tension'
+      FormType: 'tension',
+      doc: null
     }
   },
   methods: {
@@ -311,7 +312,7 @@ export default {
             filename: 'чертеж_пружины.pdf',
             image: {
               type: 'jpeg',
-              quality: 2
+              quality: 1
             },
             jsPDF: {
               units: 'pt',
@@ -398,6 +399,18 @@ export default {
     async exportToPDF () {
       await useConvertToPDF(this.$refs.document)
     },
+    /* test () {
+      console.log(this.$refs.test)
+      this.doc.html(this.$refs.test, {
+        callback: function (doc) {
+          doc.save()
+        },
+        x: 0,
+        y: 0,
+        width: 300
+      }
+      )
+    }, */
     resetValues () {
       this.WireDiameter = 0
       this.OuterDiameter = 0
@@ -433,7 +446,7 @@ export default {
       return parseFloat(this.SpringFullLength) + parseFloat(this.MaxTension)
     },
     ForceAtPreDeformation: function () {
-      return this.SpringStiffness * parseFloat(this.LengthAtPreTension) - parseFloat(this.SpringFullLength)
+      return this.SpringStiffness * parseFloat(this.LengthAtPreTension) - parseFloat(this.SpringFullLength) * parseFloat(this.SpringStiffness)
     },
     ForceAtWorkingDeformation: function () {
       return this.SpringStiffness * parseFloat(this.LengthAtWorkingTension) - this.SpringStiffness * parseFloat(this.SpringFullLength)
