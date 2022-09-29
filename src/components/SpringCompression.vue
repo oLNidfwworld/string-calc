@@ -121,8 +121,8 @@
           <transition name="left-slide">
           <button v-if="CheckErrors.length === 0" class="calc-btn calc-btn__yellow cursor-pointer" @click="ShowModal = true; FormType = 'compression'">Заказать</button>
           </transition>
-          <button class="calc-btn calc-btn__yellow" @click="ToPrint">Распечатать</button>
-          <button class="calc-btn calc-btn__yellow" @click="exportToPDF">Скачать</button>
+          <button class="calc-btn calc-btn__yellow" @click="usePFD('print')">Распечатать</button>
+          <button class="calc-btn calc-btn__yellow" @click="usePFD('download')">Скачать</button>
         </div>
         <button class="calc-btn__reset w-fit mb-3" @click="resetValues">Перейти к новому расчету</button>
         <div>
@@ -141,7 +141,7 @@
           <span class="scheme-watermark">https://wollter.ru</span>
           <span class="scheme-title">Расчет пружин сжатия</span>
         </div>
-        <div class="scheme-spring mb-5">
+        <div class="scheme-spring px-3 px-3 xl:px-20 mb-5">
           <SchemeCompressionSpringPressedPolished v-if="SelectedVariantOfDesignOfSupportCoils === VariantOfDesignOfSupportCoils[0]" :SchemeData="SchemeData"/>
           <SchemeCompressionSpringPressedNotPolished v-if="SelectedVariantOfDesignOfSupportCoils === VariantOfDesignOfSupportCoils[1]" :SchemeData="SchemeData"/>
           <SchemeCompressionSpringNotPressedNotPolished v-if="SelectedVariantOfDesignOfSupportCoils === VariantOfDesignOfSupportCoils[2]" :SchemeData="SchemeData"/>
@@ -207,32 +207,22 @@
 </template>
 
 <script>
-/* eslint-disable */
 import SmartInput from '@/components/smart-input'
 import SchemeCompressionSpringPressedPolished from '@/components/SchemeCompressionSpringPressedPolished'
 import SchemeCompressionSpringPressedNotPolished from '@/components/SchemeCompressionSpringPressedNotPolished'
 import SchemeCompressionSpringNotPressedNotPolished from '@/components/SchemeCompressionSpringNotPressedNotPolished'
 import vSelect from 'vue-select'
-import html2pdf from 'html2pdf.js'
 import { VueFinalModal } from 'vue-final-modal'
 import { maska } from 'maska'
 import 'vue-select/dist/vue-select.css'
 import {
   useFilterTotal,
   useFilterError,
-  useConvertToPDF,
   useFormText,
   toDataURL,
-  ConvertToPDF, DownloadToPDF
+  ConvertToPDF
 } from '@/plugins/functions'
 import TotalTable from '@/components/TotalTable'
-import JsPDF from 'jspdf'
-import AutoTable from 'jspdf-autotable'
-import GOST_A from '@/assets/fonts/GOST_A-normal.js'
-import * as pdfMake from 'pdfmake'
-import pdfFonts from "pdfmake/build/vfs_fonts"
-import htmlToPdfmake from "html-to-pdfmake"
-import html2canvas from "html2canvas"
 
 export default {
   name: 'SpringCompression',
@@ -287,12 +277,6 @@ export default {
       Comm: '',
       sendBtnHide: false,
       FormType: 'compression',
-      doc: null,
-      kek: {
-        coin: '1sgrs',
-        game_group: 'GameGroup'
-      },
-      kekres: [],
       watermark: ''
     }
   },
@@ -303,29 +287,12 @@ export default {
     ChangeTotalCoils () {
       this.TotalNumberOfCoils = parseFloat(this.WorkNumberOfCoils) + 2
     },
-    SendForm () {
+    async SendForm () {
       if (this.FormType === 'compression') {
         if (this.CheckErrors.length === 0 && this.Errors.Phone === false) {
           this.sendBtnHide = true
-          const opt = {
-            margin: 0,
-            filename: 'чертеж_пружины.pdf',
-            image: {
-              type: 'jpeg',
-              quality: 2
-            },
-            jsPDF: {
-              units: 'pt',
-              format: 'A4',
-              orientation: 'p',
-              putOnlyUsedFonts: true,
-              floatPrecision: 20
-            }
-          }
-          /* Для узких экранов запоминаем разрешение и ставим его побольше чтобы корректно сгенерировался PDF */
-          const curRes = window.innerWidth
-          window.innerWidth = 1600
-          html2pdf().set(opt).from(this.$refs.document).outputPdf().then((pdfAsString) => {
+          const GeneratedPDF = await ConvertToPDF(this.$el.querySelector('.scheme-svg'), this.$el.querySelector('.scheme-spring'), this.watermark, this.ForTotal, 'Расчет пружин сжатия')
+          GeneratedPDF.getBase64((base64DataFile) => {
             const send = new FormData()
             send.append('key', 'v7WIMOidp9ueH3Lt')
             send.append('SpringType', this.FormType)
@@ -354,7 +321,7 @@ export default {
             send.append('Phone', this.Phone)
             send.append('Email', this.Email)
             send.append('Comm', this.Comm)
-            send.append('files', btoa(pdfAsString))
+            send.append('files', base64DataFile)
             this.axios.post(document.location.href.split('?')[0] + 'ajax.php', send).then((response) => {
               if (response.data.status === 'success') {
                 this.ShowModal = false
@@ -367,7 +334,6 @@ export default {
               }
             })
           })
-          window.innerWidth = curRes
         }
       }
       if (this.FormType === 'SpecialSpring') {
@@ -395,38 +361,19 @@ export default {
         }
       }
     },
-    async exportToPDF () {
-      await useConvertToPDF(this.$refs.document)
-    },
-    test () {
-      let arRes = []
-      this.kekres.push(Object.assign({}, this.kek))
-      this.doc.addFileToVFS('GOST_A-normal.ttf', GOST_A)
-      this.doc.setFont('GOST_A')
-      this.doc.rect(5, 5, this.doc.internal.pageSize.width - 10, this.doc.internal.pageSize.height - 10, 'S')
-      this.doc.text('hello kitty азазаа', 10, 10, null, null, 'center')
-      this.doc.text('This is centred text.', 105, 80, null, null, 'center')
-      Object.entries(this.ForTotal).map((key) => {
-        console.log(arRes)
-        arRes.push([key[1].name, key[1].value])
-        return console.log(arRes)
-      })
-      AutoTable(this.doc, {
-        columnStyles: { 0: { halign: 'center', fillColor: [255, 255, 255] }, 1: { halign: 'center', fillColor: [255, 255, 255] } },
-        head: [],
-        body: arRes
-      })
-      this.doc.save()
-    },
-    async test1 () {
-      let arRes = []
-      Object.entries(this.ForTotal).map((key) => {
-        console.log(arRes)
-        arRes.push([key[1].name, key[1].value])
-      })
-      let ee = await DownloadToPDF(this.$el.querySelector('.scheme-svg'), this.$el.querySelector('.scheme-spring'), this.watermark, arRes)
-      console.log(ee)
-
+    /*
+    * @param {string} what should to do with pdf
+    * */
+    async usePFD (action) {
+      const pdf = await ConvertToPDF(this.$el.querySelector('.scheme-svg'), this.$el.querySelector('.scheme-spring'), this.watermark, this.ForTotal, 'Расчет пружин сжатия')
+      switch (action) {
+        case 'download':
+          pdf.download()
+          break
+        case 'print':
+          pdf.print()
+          break
+      }
     },
     resetValues () {
       this.WireDiameter = 0
@@ -648,8 +595,6 @@ export default {
     this.SelectedCovering = this.Covering[0]
     this.SelectedVariantOfDesignOfSupportCoils = this.VariantOfDesignOfSupportCoils[0]
     this.SelectedMaterial = this.Material[0]
-    this.doc = new JsPDF()
-    pdfMake.vfs = pdfFonts.pdfMake.vfs
     toDataURL('https://wollter.ru/upload/img/watermarkbg.png',
       (dataUrl) => {
         this.watermark = dataUrl
@@ -776,7 +721,7 @@ export default {
   .calc {
     &-btn {
       @apply flex items-center justify-center px-6 py-3 text-white w-full relative cursor-pointer;
-      border: 0px solid #5C5C5C;
+      border: 0 solid #5C5C5C;
       border-radius: 3px;
       &__grey {
         background: #5C5C5C;

@@ -1,4 +1,3 @@
-import html2pdf from 'html2pdf.js'
 import html2canvas from 'html2canvas'
 import * as pdfMake from 'pdfmake'
 
@@ -11,17 +10,6 @@ export function useFilterError (arr) {
   return Object.keys(arr)
     .map(key => arr[key])
     .filter(item => item.measure !== false && item.value.length !== 0 && (isNaN(item.value) || parseFloat(item.value) <= 0))
-}
-export async function useConvertToPDF (node) {
-  /* Для узких экранов запоминаем разрешение и ставим его побольше чтобы корректно сгенерировался PDF */
-  const curRes = window.innerWidth
-  window.innerWidth = 1600
-  await html2pdf(node, {
-    margin: 0,
-    filename: 'чертеж_пружины.pdf',
-    jsPDF: { units: 'pt', format: 'A4', orientation: 'p', putOnlyUsedFonts: true, floatPrecision: 20 }
-  })
-  window.innerWidth = curRes
 }
 export function useFormText (type) {
   return type === 'compression' || type === 'tension'
@@ -46,7 +34,19 @@ export function toDataURL (src, callback, outputFormat) {
     image.src = src
   }
 }
-export function PreparePDFContent (scheme, watermark, total) {
+
+/**
+ * @param {object} scheme to print
+ * @param {string} watermark image to print
+ * @param {object} total array of table
+ * @param {string} title title of scheme
+ */
+export function PreparePDFContent (scheme, watermark, total, title) {
+  const TotalTable = []
+  Object.values(total).map((key) => {
+    const measure = key.measure === false ? '' : ' ' + key.measure
+    return TotalTable.push([key.name, key.value + measure])
+  })
   return {
     pageOrientation: 'A4',
     background: [
@@ -70,7 +70,7 @@ export function PreparePDFContent (scheme, watermark, total) {
     ],
     content: [
       {
-        svg: '<svg width="300" height="100" transform="scale(0.7) translate(-20,-20)" xmlns="http://www.w3.org/2000/svg">\n' +
+        svg: '<svg width="300" height="95" transform="scale(0.5) translate(-20,-30)" xmlns="http://www.w3.org/2000/svg">\n' +
           '      <g>\n' +
           '        <path fill="#231F20" d="M56.086,63.077H50.08l-6.784-22.372l-6.782,22.372h-6.007l-9.84-36.871h7.509l5.697,23.252l6.732-23.252    h5.387l6.729,23.252l5.749-23.252h7.51L56.086,63.077z"/>\n' +
           '        <path fill="#231F20" d="M97.563,59.349c-2.59,2.693-5.957,4.038-9.943,4.038c-3.989,0-7.407-1.397-9.995-4.038    c-3.884-3.989-3.624-10.1-3.624-14.189v-2.02c0-7.354,0.775-10.306,3.624-13.206c2.588-2.641,6.006-4.038,9.995-4.038    c3.934,0,7.353,1.397,9.943,4.038c2.588,2.642,3.676,6.164,3.676,12.118v2.59C101.24,49.923,101.5,55.257,97.563,59.349z     M92.23,34.284c-1.138-1.294-2.746-1.966-4.609-1.966c-1.865,0-3.523,0.672-4.661,1.966c-1.655,1.813-1.761,5.283-1.761,9.84    c0,4.505-0.208,8.906,1.761,10.875c1.243,1.242,2.796,1.966,4.661,1.966c1.863,0,3.471-0.672,4.609-1.966    c1.5-1.71,1.813-3.521,1.813-11.032C94.043,37.909,93.678,35.89,92.23,34.284z"/>\n' +
@@ -137,11 +137,11 @@ export function PreparePDFContent (scheme, watermark, total) {
           '    </svg>'
       },
       {
-        text: 'Расчет пружин сжатия',
+        text: title,
         alignment: 'center',
         fontSize: 20,
         bold: true,
-        margin: [0, -30, 0, 20]
+        margin: [0, -60, 0, 20]
       },
       {
         image: scheme,
@@ -153,36 +153,37 @@ export function PreparePDFContent (scheme, watermark, total) {
         table: {
           headerRows: 0,
           widths: [250, 250],
-          // dontBreakRows: true,
-          // keepWithHeaderRows: 1,
-          body: total
+          body: TotalTable
         }
       }
-    ]
+    ],
+    defaultStyle: {
+      fontSize: 12
+    }
   }
 }
-export function ConvertToPDF (scheme, schemeToPrint, watermark, total) {
+
+/**
+ * @param {element} scheme to resize
+ * @param {element} schemeToPrint image to print
+ * @param {string} watermark base64Url
+ * @param {object} total array of table
+ * @param {string} title title of scheme
+ */
+export async function ConvertToPDF (scheme, schemeToPrint, watermark, total, title) {
   let schemaImg = null
-  let arObj = null
+  let result = []
   scheme.style.width = '768px'
-  html2canvas(schemeToPrint, { backgroundColor: null, windowWidth: 1023, scale: 2 }).then(canvas => {
-    schemaImg = canvas.toDataURL()
-    arObj = pdfMake.createPdf(PreparePDFContent(schemaImg, watermark, total)).print()
-    scheme.style.width = 'auto'
-    return arObj
-  })
-}
-export async function DownloadToPDF (scheme, schemeToPrint, watermark, total) {
-  let schemaImg = null
-  let test = 'test'
-  scheme.style.width = '768px'
-  await html2canvas(schemeToPrint, { backgroundColor: null, windowWidth: 1023, scale: 2 }).then(canvas => {
-    schemaImg = canvas.toDataURL()
-    pdfMake.createPdf(PreparePDFContent(schemaImg, watermark, total)).getBase64((data) => {
-      console.log(data)
-      test = data
-      scheme.style.width = 'auto'
-      return test
+  try {
+    await html2canvas(schemeToPrint, { backgroundColor: null, windowWidth: 1023, scale: 2 }).then(canvas => {
+      schemaImg = canvas.toDataURL()
+      result = pdfMake.createPdf(PreparePDFContent(schemaImg, watermark, total, title))
+      return result
     })
-  })
+  } catch (error) {
+    result = null
+    return result
+  }
+  scheme.style.width = 'auto'
+  return result
 }

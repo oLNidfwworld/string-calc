@@ -137,8 +137,8 @@
           <transition name="left-slide">
           <button v-if="CheckErrors.length === 0" class="calc-btn calc-btn__yellow cursor-pointer" @click="ShowModal = true; FormType = 'tension'">Заказать</button>
           </transition>
-          <button class="calc-btn calc-btn__yellow" @click="ToPrint">Распечатать</button>
-          <button class="calc-btn calc-btn__yellow" @click="exportToPDF">Скачать</button>
+          <button class="calc-btn calc-btn__yellow" @click="usePFD('print')">Распечатать</button>
+          <button class="calc-btn calc-btn__yellow" @click="usePFD('download')">Скачать</button>
         </div>
         <button class="calc-btn__reset w-fit mb-3" @click="resetValues">Перейти к новому расчету</button>
         <div>
@@ -227,11 +227,16 @@
 <script>
 import SmartInput from '@/components/smart-input'
 import vSelect from 'vue-select'
-import html2pdf from 'html2pdf.js'
 import { VueFinalModal } from 'vue-final-modal'
 import { maska } from 'maska'
 import 'vue-select/dist/vue-select.css'
-import { useFilterTotal, useFilterError, useConvertToPDF, useFormText } from '@/plugins/functions'
+import {
+  useFilterTotal,
+  useFilterError,
+  useFormText,
+  toDataURL,
+  ConvertToPDF
+} from '@/plugins/functions'
 import TotalTable from '@/components/TotalTable'
 import SchemeTensionCenteredFullLoop from '@/components/SchemeTensionCentredFullLoop'
 import SchemeTensionCenteredHalfLoop from '@/components/SchemeTensionCentredHalfLoop'
@@ -303,29 +308,12 @@ export default {
     ToPrint () {
       this.$htmlToPaper('scheme-print', { specs: ['fullscreen=yes', 'titlebar=no', 'scrollbars=no'] })
     },
-    SendForm () {
+    async SendForm () {
       if (this.FormType === 'tension') {
         if (this.CheckErrors.length === 0 && this.Errors.Phone === false) {
           this.sendBtnHide = true
-          const opt = {
-            margin: 0,
-            filename: 'чертеж_пружины.pdf',
-            image: {
-              type: 'jpeg',
-              quality: 1
-            },
-            jsPDF: {
-              units: 'pt',
-              format: 'A4',
-              orientation: 'p',
-              putOnlyUsedFonts: true,
-              floatPrecision: 20
-            }
-          }
-          /* Для узких экранов запоминаем разрешение и ставим его побольше чтобы корректно сгенерировался PDF */
-          const curRes = window.innerWidth
-          window.innerWidth = 1600
-          html2pdf().set(opt).from(this.$refs.document).outputPdf().then((pdfAsString) => {
+          const GeneratedPDF = await ConvertToPDF(this.$el.querySelector('.scheme-svg'), this.$el.querySelector('.scheme-spring'), this.watermark, this.ForTotal, 'Расчет пружин сжатия')
+          GeneratedPDF.getBase64((base64DataFile) => {
             const send = new FormData()
             send.append('key', 'v7WIMOidp9ueH3Lt')
             send.append('SpringType', this.FormType)
@@ -355,7 +343,7 @@ export default {
             send.append('Phone', this.Phone)
             send.append('Email', this.Email)
             send.append('Comm', this.Comm)
-            send.append('files', btoa(pdfAsString))
+            send.append('files', base64DataFile)
             this.axios.post(document.location.href.split('?')[0] + 'ajax.php', send).then((response) => {
               if (response.data.status === 'success') {
                 this.ShowModal = false
@@ -368,7 +356,6 @@ export default {
               }
             })
           })
-          window.innerWidth = curRes
         }
       }
       if (this.FormType === 'SpecialSpring') {
@@ -396,21 +383,20 @@ export default {
         }
       }
     },
-    async exportToPDF () {
-      await useConvertToPDF(this.$refs.document)
-    },
-    /* test () {
-      console.log(this.$refs.test)
-      this.doc.html(this.$refs.test, {
-        callback: function (doc) {
-          doc.save()
-        },
-        x: 0,
-        y: 0,
-        width: 300
+    /*
+    * @param {string} what should to do with pdf
+    * */
+    async usePFD (action) {
+      const pdf = await ConvertToPDF(this.$el.querySelector('.scheme-svg'), this.$el.querySelector('.scheme-spring'), this.watermark, this.ForTotal, 'Расчет пружин сжатия')
+      switch (action) {
+        case 'download':
+          pdf.download()
+          break
+        case 'print':
+          pdf.print()
+          break
       }
-      )
-    }, */
+    },
     resetValues () {
       this.WireDiameter = 0
       this.OuterDiameter = 0
@@ -650,6 +636,11 @@ export default {
     this.SelectedCovering = this.Covering[0]
     this.SelectedTypeOfHook = this.TypeOfHook[0]
     this.SelectedMaterial = this.Material[0]
+    toDataURL('https://wollter.ru/upload/img/watermarkbg.png',
+      (dataUrl) => {
+        this.watermark = dataUrl
+      }
+    )
   }
 }
 </script>
@@ -771,7 +762,7 @@ export default {
   .calc {
     &-btn {
       @apply flex items-center justify-center px-6 py-3 text-white w-full relative cursor-pointer;
-      border: 0px solid #5C5C5C;
+      border: 0 solid #5C5C5C;
       border-radius: 3px;
       &__grey {
         background: #5C5C5C;

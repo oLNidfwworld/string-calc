@@ -19,6 +19,8 @@
 <script>
 import SpringCompression from '@/components/SpringCompression'
 import SpringTension from '@/components/SpringTension'
+import * as pdfMake from 'pdfmake'
+import pdfFonts from 'pdfmake/build/vfs_fonts'
 export default {
   name: 'SpringCalc',
   // eslint-disable-next-line vue/no-unused-components
@@ -27,6 +29,10 @@ export default {
     return {
       springType: 0
     }
+  },
+  mounted () {
+    // eslint-disable-next-line no-import-assign
+    pdfMake.vfs = pdfFonts.pdfMake.vfs
   }
 }
 </script>
