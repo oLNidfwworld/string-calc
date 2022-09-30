@@ -11,8 +11,8 @@
     </button>
   </div>
   <div>
-    <SpringCompression v-if="springType === 0"/>
-    <SpringTension v-if="springType === 1"/>
+    <SpringCompression v-if="springType === 0" SpringName="Расчет пружин сжатия"/>
+    <SpringTension v-if="springType === 1" SpringName="Расчет пружин растяжения"/>
   </div>
 </template>
 

@@ -155,7 +155,7 @@
       <div class="scheme-inner-wrapper">
         <div class="scheme-title grid items-center justify-center mt-3.5 print:mb-5 mb-10">
           <span class="scheme-watermark">https://wollter.ru</span>
-          <span class="scheme-title">Расчет пружин сжатия</span>
+          <span class="scheme-title">{{ SpringName }}</span>
         </div>
         <div class="scheme-spring px-3 xl:px-20 mb-5">
           <SchemeTensionDefault v-if="SelectedTypeOfHook === TypeOfHook[0]" :SchemeData="SchemeData"/>
@@ -258,6 +258,9 @@ export default {
     VueFinalModal
   },
   directives: { maska },
+  props: {
+    SpringName: String
+  },
   data () {
     return {
       Material: [
@@ -312,7 +315,7 @@ export default {
       if (this.FormType === 'tension') {
         if (this.CheckErrors.length === 0 && this.Errors.Phone === false) {
           this.sendBtnHide = true
-          const GeneratedPDF = await ConvertToPDF(this.$el.querySelector('.scheme-svg'), this.$el.querySelector('.scheme-spring'), this.watermark, this.ForTotal, 'Расчет пружин сжатия')
+          const GeneratedPDF = await ConvertToPDF(this.$el.querySelector('.scheme-svg'), this.$el.querySelector('.scheme-spring'), this.watermark, this.ForTotal, this.SpringName)
           GeneratedPDF.getBase64((base64DataFile) => {
             const send = new FormData()
             send.append('key', 'v7WIMOidp9ueH3Lt')
@@ -387,7 +390,7 @@ export default {
     * @param {string} what should to do with pdf
     * */
     async usePFD (action) {
-      const pdf = await ConvertToPDF(this.$el.querySelector('.scheme-svg'), this.$el.querySelector('.scheme-spring'), this.watermark, this.ForTotal, 'Расчет пружин сжатия')
+      const pdf = await ConvertToPDF(this.$el.querySelector('.scheme-svg'), this.$el.querySelector('.scheme-spring'), this.watermark, this.ForTotal, this.SpringName)
       switch (action) {
         case 'download':
           pdf.download()
@@ -725,13 +728,13 @@ export default {
   .scheme {
     &-inner {
       &-wrapper {
-        @apply relative;
+        @apply relative overflow-hidden;
         border: 3px solid #1D1F23;
       }
     }
     &-outer{
       &-wrapper{
-        @apply md:py-6 md:px-7 h-fit;
+        @apply md:py-6 md:px-7 h-fit overflow-hidden;
         border: 1px solid #1D1F23;
       }
     }
