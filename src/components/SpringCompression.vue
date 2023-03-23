@@ -368,7 +368,7 @@ export default {
     * @param {string} what should to do with pdf
     * */
     async usePFD (action) {
-      const pdf = await ConvertToPDF(this.$el.querySelector('.scheme-svg'), this.$el.querySelector('.scheme-spring'), this.watermark, this.ForTotal, this.SpringName)
+      const pdf = await ConvertToPDF(this.$el.querySelector('.scheme-svg'), this.$el.querySelector('.scheme-spring'), undefined, this.ForTotal, this.SpringName)
       switch (action) {
         case 'download':
           pdf.download()

@@ -49,25 +49,25 @@ export function PreparePDFContent (scheme, watermark, total, title) {
   })
   return {
     pageOrientation: 'A4',
-    background: [
-      {
-        image: watermark,
-        width: 600
-      },
-      {
-        canvas: [
-          {
-            type: 'rect',
-            x: 10,
-            y: 10,
-            w: 575,
-            h: 820,
-            r: 1,
-            lineColor: 'black'
-          }
-        ]
-      }
-    ],
+    // background: [
+    //   {
+    //     image: watermark,
+    //     width: 600
+    //   },
+    //   {
+    //     canvas: [
+    //       {
+    //         type: 'rect',
+    //         x: 10,
+    //         y: 10,
+    //         w: 575,
+    //         h: 820,
+    //         r: 1,
+    //         lineColor: 'black'
+    //       }
+    //     ]
+    //   }
+    // ],
     content: [
       {
         svg: '<svg width="300" height="95" transform="scale(0.5) translate(-20,-50)" xmlns="http://www.w3.org/2000/svg">\n' +
