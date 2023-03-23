@@ -264,7 +264,7 @@ export default {
       Covering: [
         'Без покрытия',
         'Гальваническое радужное',
-        'Гальваническое бесцветное',
+        'Цинк',
         'Порошковое'
       ],
       SelectedCovering: null,
@@ -576,6 +576,12 @@ export default {
           value: parseFloat(this.WireDiameter).toFixed(2),
           measure: 'мм',
           total: false
+        },
+        SprQuantity: {
+          name: 'Количетсво',
+          value: this.Quantity,
+          measure: 'шт',
+          total: true
         }
       }
     },

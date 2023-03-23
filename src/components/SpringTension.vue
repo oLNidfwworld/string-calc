@@ -287,7 +287,7 @@ export default {
       Covering: [
         'Без покрытия',
         'Гальваническое радужное',
-        'Гальваническое бесцветное',
+        'Цинк',
         'Порошковое'
       ],
       SelectedCovering: null,
@@ -617,6 +617,12 @@ export default {
           value: this.PreTension.length === 0 ? '' : parseFloat(this.PreTension).toFixed(2),
           measure: false,
           total: false
+        },
+        SprQuantity: {
+          name: 'Количетсво',
+          value: this.Quantity,
+          measure: 'шт',
+          total: true
         }
       }
     },
