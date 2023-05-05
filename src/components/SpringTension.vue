@@ -623,6 +623,12 @@ export default {
           value: this.Quantity,
           measure: 'шт',
           total: true
+        },
+        WritableDat: {
+          name: 'Дата',
+          value: '',
+          measure: false,
+          total: true
         }
       }
     },
