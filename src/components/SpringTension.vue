@@ -74,9 +74,21 @@
                    <path d="M1.60637 118.213L0.861898 117.468L12.7735 105.557L13.518 106.301L1.60637 118.213Z" fill="black"/>
                    <rect x="41.5933" y="123.293" width="19.0569" height="123.289" rx="9.52846" transform="rotate(172.266 41.5933 123.293)" fill="white" stroke="black" stroke-width="2"/>
                  </svg>
+                 <svg v-if="TypeOfHook.ico === 6" width="188" height="127" viewBox="0 0 188 127" fill="none" xmlns="http://www.w3.org/2000/svg">
+                   <path d="M73.9691 79.5903L73.9707 79.6382L73.977 79.6858L78.4507 113.774C79.1355 118.991 75.4608 123.776 70.2432 124.461C65.0255 125.146 60.2406 121.471 59.5558 116.253L55.0822 82.1664C54.9841 81.4188 54.9754 80.6814 55.0475 79.9645L55.0551 79.8889L55.0512 79.813C54.8954 76.7912 55.2784 73.7611 56.187 70.8655C57.2656 67.4283 59.0602 64.2585 61.4526 61.5652C63.8451 58.8718 66.7811 56.716 70.0672 55.2396C73.2069 53.829 76.5983 53.0693 80.0364 53.0045L80.2697 53.0001L80.432 53.0001L80.4352 53.0001L80.5173 53.0001L176.518 53.0001C181.764 53.0001 186.018 57.2534 186.018 62.5001C186.018 67.7468 181.764 72.0001 176.518 72.0001L80.0178 72.0001C80.0177 72.0001 80.0176 72.0001 80.0176 72.0001C79.6028 72.0001 79.0755 72.1326 78.7241 72.2321C78.3559 72.3363 77.984 72.4628 77.8351 72.5297C76.9916 72.9086 76.238 73.462 75.6239 74.1533C75.0099 74.8446 74.5492 75.6582 74.2724 76.5404C74.0261 77.3253 73.9383 78.7029 73.9691 79.5903Z" fill="white" stroke="black" stroke-width="2"/>
+                   <rect x="60.5933" y="123.293" width="19.0569" height="123.289" rx="9.52846" transform="rotate(172.266 60.5933 123.293)" fill="white" stroke="black" stroke-width="2"/>
+                   <rect x="1.04855" y="-0.948973" width="19.0569" height="121.931" rx="9.52846" transform="matrix(0.99876 0.0497869 0.0497869 -0.99876 0.0465937 123.229)" fill="black" stroke="black" stroke-width="2"/>
+                   <circle cx="11.4383" cy="115.607" r="9.52846" transform="rotate(180 11.4383 115.607)" fill="white" stroke="black" stroke-width="2"/>
+                   <path d="M9.05111 125.658L8.30664 124.913L20.2182 113.002L20.9627 113.746L9.05111 125.658Z" fill="black"/>
+                   <path d="M4.58427 122.68L3.8398 121.935L17.2403 108.535L17.9848 109.279L4.58427 122.68Z" fill="black"/>
+                   <path d="M1.60637 118.213L0.861898 117.468L12.7735 105.557L13.518 106.301L1.60637 118.213Z" fill="black"/>
+                   <rect x="41.5933" y="123.293" width="19.0569" height="123.289" rx="9.52846" transform="rotate(172.266 41.5933 123.293)" fill="white" stroke="black" stroke-width="2"/>
+                 </svg>
+
                  <span class="whitespace-normal">{{ TypeOfHook.title }}</span>
                </div>
              </template>
+
              <template #search="{attributes, events}">
                <input v-bind="attributes" v-on="events"
                  disabled
@@ -163,6 +175,7 @@
           <SchemeTensionCenteredHalfLoop  v-if="SelectedTypeOfHook === TypeOfHook[2]" :SchemeData="SchemeData"/>
           <SchemeTensionTangent v-if="SelectedTypeOfHook === TypeOfHook[3]" :SchemeData="SchemeData" />
           <SchemeTensionExtendedHook v-if="SelectedTypeOfHook === TypeOfHook[4]" :SchemeData="SchemeData"/>
+          <SchemeTensionCenteredFullLoopZeroDeg v-if="SelectedTypeOfHook === TypeOfHook[5]" :SchemeData="SchemeData"/>
         </div>
         <div ref="test" class="">
           <TotalTable :items="ForTotal"/>
@@ -243,10 +256,12 @@ import SchemeTensionCenteredHalfLoop from '@/components/SchemeTensionCentredHalf
 import SchemeTensionTangent from '@/components/SchemeTensionTangent'
 import SchemeTensionExtendedHook from '@/components/SchemeTensionExtendedHook'
 import SchemeTensionDefault from '@/components/SchemeTensionDefault'
+import SchemeTensionCenteredFullLoopZeroDeg from '@/components/SchemeTensionCentredFullLoopZeroDeg.vue'
 
 export default {
   name: 'SpringTension',
   components: {
+    SchemeTensionCenteredFullLoopZeroDeg,
     SchemeTensionDefault,
     SchemeTensionExtendedHook,
     SchemeTensionTangent,
@@ -274,7 +289,8 @@ export default {
         { title: 'Из полного витка выведенный на центр', ico: 2 },
         { title: 'Из половины витка выведенный на центр', ico: 3 },
         { title: 'Из полного витка по касательной (под 90°)', ico: 4 },
-        { title: 'Вытянутый зацеп (крючкового типа)', ico: 5 }
+        { title: 'Вытянутый зацеп (крючкового типа)', ico: 5 },
+        { title: 'Из полного витка выведенный на центр 0 градусов', ico: 6 }
       ],
       WireDiameter: 0,
       OuterDiameter: 0,
