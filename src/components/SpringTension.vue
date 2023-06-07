@@ -221,9 +221,9 @@
         </div>
         <div class="scheme-spring px-3 xl:px-20 mb-5">
           <SchemeTensionDefault v-if="SelectedTypeOfHook === TypeOfHook[0]" :SchemeData="SchemeData"/>
-          <SchemeTensionCenteredFullLoop v-if="SelectedTypeOfHook === TypeOfHook[1]" :SchemeData="SchemeData"/>
-          <SchemeTensionCenteredHalfLoop  v-if="SelectedTypeOfHook === TypeOfHook[2]" :SchemeData="SchemeData"/>
-          <SchemeTensionTangent v-if="SelectedTypeOfHook === TypeOfHook[3]" :SchemeData="SchemeData" />
+          <SchemeTensionCenteredFullLoop v-if="SelectedTypeOfHook === TypeOfHook[5]" :SchemeData="SchemeData"/>
+          <SchemeTensionCenteredHalfLoop  v-if="SelectedTypeOfHook === TypeOfHook[1]" :SchemeData="SchemeData"/>
+          <SchemeTensionTangent v-if="SelectedTypeOfHook === TypeOfHook[6]" :SchemeData="SchemeData" />
           <SchemeTensionExtendedHook v-if="SelectedTypeOfHook === TypeOfHook[4]" :SchemeData="SchemeData"/>
           <SchemeTensionCenteredFullLoopZeroDeg v-if="SelectedTypeOfHook === TypeOfHook[5]" :SchemeData="SchemeData"/>
           <SchemeTensionCenteredFullLoopRazvertDeg v-if="SelectedTypeOfHook === TypeOfHook[6]" :SchemeData="SchemeData"/>
@@ -350,17 +350,17 @@ export default {
         'нерж. EN 10270-3-1.4310 (AISI 302)'
       ],
       TypeOfHook: [
-        { title: 'Без зацепа', ico: 1 },
-        { title: 'Из полного витка выведенный на центр 90 градусов', ico: 2 },
-        { title: 'Из половины витка выведенный на центр 90 градусов', ico: 3 },
-        { title: 'Из полного витка по касательной (под 90°)', ico: 4 },
-        { title: 'Вытянутый зацеп (крючкового типа) 0 градусов', ico: 5 },
-        { title: 'Из полного витка выведенный на центр 0 градусов', ico: 6 },
-        { title: 'Из полного витка выведенный на центр 180 градусов', ico: 7 },
-        { title: 'Вытянутый зацеп (крючкового типа) 90 градусов', ico: 8 },
-        { title: 'Вытянутый зацеп (крючкового типа) 180 градусов', ico: 9 },
-        { title: 'Из половины витка выведенный на центр 180 градусов', ico: 10 },
-        { title: 'Из половины витка выведенный на центр 0 градусов', ico: 11 }
+        { title: '1. Без зацепа', ico: 1 },
+        { title: '2. Из полного витка выведенный на центр 0 градусов', ico: 6 },
+        { title: '3. Из полного витка выведенный на центр 90 градусов', ico: 2 },
+        { title: '4. Из полного витка выведенный на центр 180 градусов', ico: 7 },
+        { title: '5. Вытянутый зацеп (крючкового типа) 0 градусов', ico: 5 },
+        { title: '6. Вытянутый зацеп (крючкового типа) 90 градусов', ico: 8 },
+        { title: '7. Вытянутый зацеп (крючкового типа) 180 градусов', ico: 9 },
+        { title: '8. Из половины витка выведенный на центр 0 градусов', ico: 11 },
+        { title: '9. Из половины витка выведенный на центр 90 градусов', ico: 3 },
+        { title: '10. Из половины витка выведенный на центр 180 градусов', ico: 10 },
+        { title: '11. Из полного витка по касательной (под 90°)', ico: 4 }
       ],
       WireDiameter: 0,
       OuterDiameter: 0,
