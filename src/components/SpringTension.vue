@@ -220,17 +220,17 @@
           <span class="scheme-title">{{ SpringName }}</span>
         </div>
         <div class="scheme-spring px-3 xl:px-20 mb-5">
-          <SchemeTensionDefault v-if="SelectedTypeOfHook === TypeOfHook[0]" :SchemeData="SchemeData"/>
-          <SchemeTensionCenteredFullLoop v-if="SelectedTypeOfHook === TypeOfHook[5]" :SchemeData="SchemeData"/>
-          <SchemeTensionCenteredHalfLoop  v-if="SelectedTypeOfHook === TypeOfHook[1]" :SchemeData="SchemeData"/>
-          <SchemeTensionTangent v-if="SelectedTypeOfHook === TypeOfHook[6]" :SchemeData="SchemeData" />
-          <SchemeTensionExtendedHook v-if="SelectedTypeOfHook === TypeOfHook[4]" :SchemeData="SchemeData"/>
-          <SchemeTensionCenteredFullLoopZeroDeg v-if="SelectedTypeOfHook === TypeOfHook[5]" :SchemeData="SchemeData"/>
-          <SchemeTensionCenteredFullLoopRazvertDeg v-if="SelectedTypeOfHook === TypeOfHook[6]" :SchemeData="SchemeData"/>
-          <SchemeTensionExtendedHookRightDeg v-if="SelectedTypeOfHook === TypeOfHook[7]" :SchemeData="SchemeData"/>
-          <SchemeTensionExtendedHookRazvertDeg v-if="SelectedTypeOfHook === TypeOfHook[8]" :SchemeData="SchemeData"/>
-          <SchemeTensionCenteredHalfLoopRazvertDeg v-if="SelectedTypeOfHook === TypeOfHook[9]" :SchemeData="SchemeData"/>
-          <SchemeTensionCenteredHalfLoopZeroDeg v-if="SelectedTypeOfHook === TypeOfHook[10]" :SchemeData="SchemeData"/>
+          <SchemeTensionDefault v-if="SelectedTypeOfHook.ico  === 1" :SchemeData="SchemeData"/>
+          <SchemeTensionCenteredFullLoop v-if="SelectedTypeOfHook.ico  === 2" :SchemeData="SchemeData"/>
+          <SchemeTensionCenteredHalfLoop  v-if="SelectedTypeOfHook.ico  === 3" :SchemeData="SchemeData"/>
+          <SchemeTensionTangent v-if="SelectedTypeOfHook.ico  === 4" :SchemeData="SchemeData" />
+          <SchemeTensionExtendedHook v-if="SelectedTypeOfHook.ico  === 5" :SchemeData="SchemeData"/>
+          <SchemeTensionCenteredFullLoopZeroDeg v-if="SelectedTypeOfHook.ico  === 6" :SchemeData="SchemeData"/>
+          <SchemeTensionCenteredFullLoopRazvertDeg v-if="SelectedTypeOfHook.ico  === 7" :SchemeData="SchemeData"/>
+          <SchemeTensionExtendedHookRightDeg v-if="SelectedTypeOfHook.ico  === 8" :SchemeData="SchemeData"/>
+          <SchemeTensionExtendedHookRazvertDeg v-if="SelectedTypeOfHook.ico  === 9" :SchemeData="SchemeData"/>
+          <SchemeTensionCenteredHalfLoopRazvertDeg v-if="SelectedTypeOfHook.ico  === 10" :SchemeData="SchemeData"/>
+          <SchemeTensionCenteredHalfLoopZeroDeg v-if="SelectedTypeOfHook.ico  === 11" :SchemeData="SchemeData"/>
         </div>
         <div ref="test" class="">
           <TotalTable :items="ForTotal"/>
@@ -732,6 +732,9 @@ export default {
     Phone (cur) {
       this.Errors.Phone = cur.replace(/[^0-9]/g, '').length <= 10
     }
+  },
+  beforeMount () {
+    this.SelectedTypeOfHook = this.TypeOfHook[0]
   },
   mounted () {
     this.SelectedCovering = this.Covering[0]
