@@ -129,6 +129,7 @@
     <text x="88" y="532" class="scheme-spring__value">
       {{ SchemeData.SpringMass.value }}
     </text>
+    <text x="400" y="532" class="scheme-spring__value">По касательной</text>
   </svg>
 </template>
 
