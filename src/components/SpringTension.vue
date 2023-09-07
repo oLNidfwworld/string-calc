@@ -676,7 +676,7 @@ export default {
         },
         SpringMass: {
           name: 'Масса пружины (m1)',
-          value: parseFloat(this.SpringMass).toFixed(2),
+          value: parseFloat(this.SpringMass).toFixed(4),
           measure: 'кг',
           total: true
         },
